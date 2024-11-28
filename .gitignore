@@ -56,3 +56,6 @@ __pypackages__/
 # Jupyter Notebook
 .ipynb_checkpoints/
 data
+
+dz1
+dz1_run.py
