@@ -1,0 +1,58 @@
+pytest_cache/
+../.env
+venv
+app/.pytest_cache
+copy_data
+smth_important
+.idea/
+.env
+.git/
+# Byte-compiled / optimized Python files
+__pycache__/
+../__pycache__/
+../../__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyCharm files
+.vscode/
+
+# Virtual environment
+venv/
+ENV/
+env/
+
+# FastAPI specific
+/.venv
+__pypackages__/
+
+# Logs
+*.log
+# macOS files
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+data
