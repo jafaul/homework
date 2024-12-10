@@ -10,6 +10,4 @@ RUN pip install --break-system-packages --no-cache-dir -r requirements.txt
 
 EXPOSE 5000:5000/tcp
 
-CMD python3 app.py
-
 # why don't we need to set up venv on Docker?
