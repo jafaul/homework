@@ -281,3 +281,8 @@ fabric.properties
 .idea/**/azureSettings.xml
 
 # End of https://www.toptal.com/developers/gitignore/api/flask,pycharm
+.ipynb_checkpoints/
+data
+
+dz1
+dz1_run.py
