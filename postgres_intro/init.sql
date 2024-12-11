@@ -55,7 +55,7 @@ CREATE TABLE "course_student" (
 CREATE TABLE "lesson" (
     "id" bigserial PRIMARY KEY,
     "course_id" bigserial NOT NULL,
-    "name" VARCHAR(30) NOT NULL,
+    "title" VARCHAR(30) NOT NULL,
     "description" VARCHAR(300),
 
     CONSTRAINT fk_course FOREIGN KEY("course_id") REFERENCES "course"(id)
@@ -123,7 +123,6 @@ CREATE TABLE "homework_mark" (
 ALTER TABLE "homework" ADD "deadline" TIMESTAMP WITHOUT TIME ZONE;
 -- * Додає дату здачі до відповіді
 ALTER TABLE "homework_answer" ADD "submission_date" TIMESTAMP WITHOUT TIME ZONE default now();
-
 
 -- todo check bi-tree, query analyzer
 
