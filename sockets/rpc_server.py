@@ -1,3 +1,4 @@
+import os
 import socket
 from typing import Optional
 
@@ -10,7 +11,7 @@ from typing import Optional
 # 3. Get all dictionary keys: getkeys
 # 4. Exit the command interface: exit
 
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 PORT = 53554
 COMMANDS = ("get", "set", "getkeys", "exit")
 
@@ -74,21 +75,18 @@ class RpcServer:
         return result 
 
     def _handle_client(self, conn, addr):
-        while conn:
-            print(f"Connected by {addr}")
+        print(f"Connected by {addr}")
+        with conn:
             while True:
                 buf = conn.recv(1024)
-
                 command = buf.decode("utf-8").strip()
                 print(f"Received request: '{command}'")
 
                 result = self.__process_command(command)
-
-                if result == "exit":
+                if result.strip() == "exit":
                     print("Exit command received. Closing connection.")
-                    conn = False
+                    conn.close()
                     break
-
                 if result is not None:
                     print(f"{result}")
 
@@ -98,10 +96,20 @@ class RpcServer:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             # setsockopt helps to avoid bind() exception: OSError: [Errno 48] Address already in use
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            s.bind((HOST, PORT))
+            s.bind((self.host, self.port))
             s.listen(5)
-            conn, addr = s.accept()
-            self._handle_client(conn, addr)
+            while True:
+                conn, addr = s.accept()
+                pid = os.fork()
+                # from pdb import set_trace; set_trace()
+                # pid is a process ID
+                if pid == 0:
+                    # parent process
+                    continue
+                else:
+                    # current already existed process
+                    self._handle_client(conn, addr)
+                    break
 
 
 if __name__ == "__main__":
