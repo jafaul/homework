@@ -2,7 +2,6 @@ import random
 import string
 from datetime import datetime
 
-import werkzeug
 from flask import Flask, request, Response, jsonify
 
 app = Flask(__name__)
