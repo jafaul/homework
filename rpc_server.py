@@ -59,36 +59,36 @@ class RpcServer:
 
     def _handle_client(self, conn, addr):
         while conn:
-                print(f"Connected by {addr}")
-                while True:
-                    buf = conn.recv(1024)
+            print(f"Connected by {addr}")
+            while True:
+                buf = conn.recv(1024)
 
-                    request = buf.decode("utf-8").strip()
-                    print(f"Received request: '{request}'")
+                request = buf.decode("utf-8").strip()
+                print(f"Received request: '{request}'")
 
-                    if request == "exit":
-                        print("Exit command received. Closing connection.")
-                        conn = False
-                        break
+                if request == "exit":
+                    print("Exit command received. Closing connection.")
+                    conn = False
+                    break
 
-                    cmd_parser = CommandParser(request)
-                    if cmd_parser.cmd == "get":
-                        result = self.dict_manager.get(cmd_parser.params[0])
-                    elif cmd_parser.cmd == "set":
-                        result = self.dict_manager.set(cmd_parser.params[0], cmd_parser.params[1])
-                    elif cmd_parser.cmd == "getkeys":
-                        result = self.dict_manager.getkeys
-                    elif not cmd_parser.cmd:
-                        result = cmd_parser.cmd
-                    else:
-                        result = f"Unknown method '{cmd_parser.cmd}'"
+                cmd_parser = CommandParser(request)
+                if cmd_parser.cmd == "get":
+                    result = self.dict_manager.get(cmd_parser.params[0])
+                elif cmd_parser.cmd == "set":
+                    result = self.dict_manager.set(cmd_parser.params[0], cmd_parser.params[1])
+                elif cmd_parser.cmd == "getkeys":
+                    result = self.dict_manager.getkeys
+                elif not cmd_parser.cmd:
+                    result = cmd_parser.cmd
+                else:
+                    result = f"Unknown method '{cmd_parser.cmd}'"
 
-                    if result and not result.endswith("\r\n"): result += "\r\n"
+                if result and not result.endswith("\r\n"): result += "\r\n"
 
-                    if result is not None:
-                        print(f"{result}")
+                if result is not None:
+                    print(f"{result}")
 
-                    conn.sendall(f"{result}".encode("utf-8"))
+                conn.sendall(f"{result}".encode("utf-8"))
 
     def start(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
