@@ -1,9 +1,7 @@
 import argparse
 import socket
 
-HOST = '127.0.0.1'
-PORT = 53554
-TIMEOUT = 1200
+from homework.sockets.constants import CLIENT_TIMEOUT
 
 
 class RpcVal:
@@ -16,7 +14,7 @@ class RpcClient:
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.timeout = TIMEOUT
+        self.timeout = CLIENT_TIMEOUT
         self.local_data = {}
         self.s = self._connect()
 
@@ -28,8 +26,10 @@ class RpcClient:
         return s
 
     def _send_request(self, request: str):
+        print(request)
         self.s.send(request.encode('utf-8'))
         response = self.s.recv(1024).decode('utf-8')
+        print(f"Server response: {response}")
         return response
 
     def __setitem__(self, key, value):
@@ -38,7 +38,6 @@ class RpcClient:
 
     def __getitem__(self, key):
         value = self.local_data[key] if key in self.local_data else "Error: empty value"
-        # print(value)
         return value
 
     def add_val(self, rpc_val: RpcVal):
