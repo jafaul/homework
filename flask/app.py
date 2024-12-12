@@ -2,7 +2,16 @@ import random
 import string
 from datetime import datetime
 
+import psycopg2
 from flask import Flask, request, Response, jsonify
+
+conn = psycopg2.connect(
+    database="postgres",
+    user="postgres",
+    password="example",
+    host="db",
+    port="5432"
+)
 
 app = Flask(__name__)
 
