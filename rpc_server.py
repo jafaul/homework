@@ -57,33 +57,39 @@ class RpcServer:
         self.port = port
         self.dict_manager = DictManager()
 
+    def __process_command(self, command):
+        cmd_parser = CommandParser(command)
+        if cmd_parser.cmd == "get":
+            result = self.dict_manager.get(cmd_parser.params[0])
+        elif cmd_parser.cmd == "set":
+            result = self.dict_manager.set(cmd_parser.params[0], cmd_parser.params[1])
+        elif cmd_parser.cmd == "getkeys":
+            result = self.dict_manager.getkeys
+        elif not cmd_parser.cmd or cmd_parser.cmd == "exit":
+            result = cmd_parser.cmd
+        else:
+            result = f"Unknown method '{cmd_parser.cmd}'"
+            
+        if result and not result.endswith("\r\n"): result += "\r\n"
+        return result 
+
     def _handle_client(self, conn, addr):
         while conn:
             print(f"Connected by {addr}")
             while True:
                 buf = conn.recv(1024)
 
-                request = buf.decode("utf-8").strip()
+                command = buf.decode("utf-8").strip()
                 print(f"Received request: '{request}'")
 
-                if request == "exit":
+                if command == "exit":
+                    print("Exit command received. Closing connection.")
+                    break
+                result = self.__process_command(command)
+                 if result == "exit":
                     print("Exit command received. Closing connection.")
                     conn = False
                     break
-
-                cmd_parser = CommandParser(request)
-                if cmd_parser.cmd == "get":
-                    result = self.dict_manager.get(cmd_parser.params[0])
-                elif cmd_parser.cmd == "set":
-                    result = self.dict_manager.set(cmd_parser.params[0], cmd_parser.params[1])
-                elif cmd_parser.cmd == "getkeys":
-                    result = self.dict_manager.getkeys
-                elif not cmd_parser.cmd:
-                    result = cmd_parser.cmd
-                else:
-                    result = f"Unknown method '{cmd_parser.cmd}'"
-
-                if result and not result.endswith("\r\n"): result += "\r\n"
 
                 if result is not None:
                     print(f"{result}")
