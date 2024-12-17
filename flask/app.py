@@ -56,6 +56,20 @@ def get_users():
     with conn.cursor() as cursor:
         cursor.execute('SELECT * FROM "user"')
         users = selector(cursor)
+
+        for user in users:
+            cursor.execute(
+                '''
+                    SELECT * FROM "course" 
+                        JOIN "course_student" ON "course".id = "course_student".course_id 
+                    WHERE "course_student".student_id = %s
+                ''', (user['id'],)
+            )
+            user["student_of"] = selector(cursor)
+
+            cursor.execute('SELECT * FROM "course" WHERE teacher_id = %s', (user['id'],))
+            user["teacher_of"] = selector(cursor)
+
     return jsonify(users), 200
 
 
