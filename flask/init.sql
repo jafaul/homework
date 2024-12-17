@@ -13,9 +13,9 @@ CREATE TABLE "user" (
     "id" bigserial PRIMARY KEY,
     "email" VARCHAR(36) NOT NULL UNIQUE,
     "password" VARCHAR(36) NOT NULL,
-    "name" char(36) NOT NULL,
-    "surname" char(40) NOT NULL,
-    "dog_name" char(36) NOT NULL,
+    "name" VARCHAR(36) NOT NULL,
+    "surname" VARCHAR(40) NOT NULL,
+    "dog_name" VARCHAR(36) NOT NULL,
     "photo" oid
 
    -- CONSTRAINT "unique_user_id" UNIQUE("id")
@@ -52,7 +52,7 @@ CREATE TABLE "course_student" (
 --   c. Назва
 --   d. Опис
 
-CREATE TABLE "lesson" (
+CREATE TABLE "lecture" (
     "id" bigserial PRIMARY KEY,
     "course_id" bigserial NOT NULL,
     "title" VARCHAR(30) NOT NULL,
@@ -67,15 +67,16 @@ CREATE TABLE "lesson" (
 --   2. Посилається на курс
 --   3. Опис
 --   4. Максимальна оцінка
-    CREATE TABLE "homework" (
+    CREATE TABLE "task" (
     "id" bigserial PRIMARY KEY,
     "course_id" bigserial NOT NULL,
     "description" VARCHAR(300),
-    "max_mark" smallint NOT NULL,
+    "max_mark" smallint NOT NULL DEFAULT 5,
 
     CONSTRAINT fk_course FOREIGN KEY("course_id") REFERENCES "course"(id)
-    )
-;
+    );
+
+
 --
 -- * Відповідь на домашнє завдання
 --   1. Id
@@ -83,14 +84,14 @@ CREATE TABLE "lesson" (
 --   3. Опис
 --   4. Посилається на студента
 --   5. Оцінка
-CREATE TABLE "homework_answer" (
+CREATE TABLE "answer"(
     "id" bigserial PRIMARY KEY,
-    "homework_id" bigserial NOT NULL,
+    task_id bigserial NOT NULL,
     "description" VARCHAR(300),
     "student_id" bigserial NOT NULL,
-    "mark" smallint NOT NULL,
+    "mark" smallint,
 
-    CONSTRAINT fk_homework FOREIGN KEY("homework_id") REFERENCES "homework"(id),
+    CONSTRAINT fk_task FOREIGN KEY(task_id) REFERENCES "task"(id),
     CONSTRAINT fk_student FOREIGN KEY("student_id") REFERENCES "user"(id)
 
     )
@@ -107,25 +108,30 @@ CREATE TABLE "homework_answer" (
 --   3. Дата
 --   4. Оцінка
 --   5. Посилання на вчителя
-CREATE TABLE "homework_mark" (
+CREATE TABLE "mark" (
     "id" bigserial PRIMARY KEY,
     "answer_id" bigserial NOT NULL,
-    "timestamp" TIMESTAMP WITHOUT TIME ZONE DEFAULT now(),
+    "date" DATE DEFAULT now(),
     "mark" smallint NOT NULL,
     "teacher_id" bigserial NOT NULL,
 
-    CONSTRAINT fk_answer FOREIGN KEY("answer_id") REFERENCES "homework_answer"(id),
+    CONSTRAINT fk_answer FOREIGN KEY("answer_id") REFERENCES "answer"(id),
     CONSTRAINT fk_teacher FOREIGN KEY("teacher_id") REFERENCES "user"(id)
     )
 ;
 
 -- * Додає дедлайн до ДЗ
-ALTER TABLE "homework" ADD "deadline" TIMESTAMP WITHOUT TIME ZONE;
+ALTER TABLE "task" ADD "deadline" DATE DEFAULT now();
 -- * Додає дату здачі до відповіді
-ALTER TABLE "homework_answer" ADD "submission_date" TIMESTAMP WITHOUT TIME ZONE default now();
+ALTER TABLE "answer" ADD "submission_date" DATE DEFAULT now();
+
+-- todo check poetry
 
 -- todo check  query analyzer
 
 -- todo geeks for geek (data structer, algorithms courses), leetcode.com
 
 -- todo  нормальна форма
+
+-- todo read flask doc, pep8, ACID+, db transactions+, isolations
+

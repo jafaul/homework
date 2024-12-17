@@ -1,6 +1,7 @@
 services:
   flask-app:
-    build: .
+    build:
+      context: .
     volumes:
       - .:/src
     working_dir: /src
