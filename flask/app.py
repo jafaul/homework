@@ -1,12 +1,13 @@
 import random
 import string
 from datetime import datetime, timedelta
+from statistics import mean
 
 import psycopg2
 from flask import Flask, request, Response, jsonify, redirect, abort
 
 from database import conn
-from tools import query_db
+from tools import selector
 
 app = Flask(__name__)
 
@@ -32,10 +33,11 @@ def user_create():
                 )
                 conn.commit()
 
-            return redirect("/users/", code=302)
         except psycopg2.Error as e:
             print(e)
             conn.rollback()
+
+        return redirect("/users/", code=302)
 
     return """
         <form method="POST">
@@ -51,13 +53,17 @@ def user_create():
 
 @app.route("/users/", methods=["GET"])
 def get_users():
-    users = query_db(conn, 'SELECT * FROM "user"')
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT * FROM "user"')
+        users = selector(cursor)
     return jsonify(users), 200
 
 
 @app.route("/courses/", methods=["GET"])
 def get_courses():
-    courses = query_db(conn, 'SELECT * FROM "course"')
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT * FROM "course"')
+        courses = selector(cursor)
     return jsonify(courses), 200
 
 
@@ -72,7 +78,7 @@ def create_course():
                     (int(body["teacher_id"]), body["title"], body["description"])
                 )
                 course_id = cursor.fetchone()[0]
-                for student_id in body["student_ids"]:
+                for student_id in body["students_ids"].split(","):
                     cursor.execute(
                         'INSERT INTO "course_student" (course_id, student_id) VALUES (%s, %s)',
                         (course_id, student_id)
@@ -97,22 +103,56 @@ def create_course():
 
 @app.route("/courses/<course_id>/", methods=["GET"])
 def get_course_info(course_id):
-    with conn.cursor() as cursor:
-        cursor.execute('SELECT * FROM "course" WHERE id = %s', (course_id,))
-        course = cursor.fetchone()
-        return jsonify(course, type="json"), 200
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT * FROM "course" WHERE course.id = %s', (course_id,))
+            course = selector(cursor, one=True)
+
+            cursor.execute('SELECT * FROM "lecture" WHERE course_id = %s', (course_id,))
+            lectures = selector(cursor)
+
+            cursor.execute('''
+                SELECT * FROM "user" 
+                    JOIN "course_student" ON "user".id = "course_student".student_id 
+                WHERE "course_student".course_id = %s
+                ''', (course_id,)
+            )
+            students = selector(cursor)
+
+            cursor.execute('SELECT * FROM "task" WHERE "task".course_id = %s', (course_id,))
+            tasks = selector(cursor)
+            for task in tasks:
+                cursor.execute('SELECT * FROM "answer" WHERE answer.task_id = %s', (task['id'],))
+                task["answers"] = selector(cursor)
+
+            course.update({
+                "lectures": lectures,
+                "students": students,
+                "tasks": tasks,
+            })
+    except psycopg2.Error as e:
+        print(e)
+        conn.rollback()
+
+    return jsonify(course), 200
 
 
 @app.route("/courses/<course_id>/lectures/", methods=["GET", "POST"])
 def add_lectures_to_course(course_id):
     if request.method == "POST":
         body = request.form
-        with conn.cursor() as cursor:
-            cursor.execute(
-                'INSERT INTO "lecture" (course_id, title, description) VALUES (%s, %s, %s)',
-                (course_id, body["title"], body["description"])
-            )
-        return redirect(f"/courses/{course_id}", code=302)
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    'INSERT INTO "lecture" (course_id, title, description) VALUES (%s, %s, %s)',
+                    (course_id, body["title"], body["description"])
+                )
+                conn.commit()
+        except psycopg2.Error as e:
+            print(e)
+            conn.rollback()
+
+        return redirect(f"/courses/{course_id}/", code=302)
     return """
         <form method="POST">
             Title:        <input type="text" name="title" /> <br>
@@ -127,18 +167,25 @@ def add_lectures_to_course(course_id):
 def task_page(course_id):
     if request.method == "POST":
         body = request.form
-        with conn.cursor() as cursor:
-            cursor.execute(
-                'INSERT INTO "task" (course_id, description, max_mark, deadline) VALUES (%s, %s, %s, %s)',
-                (course_id, body["description"], body["max_mark"], body["deadline"])
-            )
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    'INSERT INTO "task" (course_id, description, max_mark, deadline) VALUES (%s, %s, %s, %s)',
+                    (course_id, body["description"], body["max_mark"], body["deadline"])
+                )
+                conn.commit()
+        except psycopg2.Error as e:
+            print(e)
+            conn.rollback()
+
         return redirect(f"/courses/{course_id}", code=302)
 
+    default_date = (datetime.now().today() + timedelta(days=7)).strftime("%Y-%m-%d")
     return f"""
         <form method="POST">
             Description:  <input type="text" name="description" /> <br>
             Max mark:  <input type="number" name="max_mark" max="200" value="5" /> <br>
-            Deadline:  <input type="date" name="deadline" value="{datetime.now().today() + timedelta(days=7)}" /> <br>
+            Deadline:  <input type="date" name="deadline" value="{default_date}" /> <br>
             <input type="submit" value="UPDATE" /> <br>
         </form>
      """
@@ -147,12 +194,18 @@ def task_page(course_id):
 def task_answer(course_id, task_id):
     if request.method == "POST":
         body = request.form
-        with conn.cursor() as cursor:
-            cursor.execute(
-                'INSERT INTO "answer" (task_id, description, student_id) VALUES (%s, %s, %s)',
-                (course_id, body["description"], body["student_id"])
-            )
-        return redirect(f"/courses/{course_id}", code=302)
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    'INSERT INTO "answer" (task_id, description, student_id) VALUES (%s, %s, %s)',
+                    (task_id, body["description"], body["student_id"])
+                )
+                conn.commit()
+        except psycopg2.Error as e:
+            print(e)
+            conn.rollback()
+
+        return redirect(f"/courses/{course_id}/", code=302)
 
     return """
         <form method="POST">
@@ -168,11 +221,21 @@ def task_answer(course_id, task_id):
 def get_mark(course_id, task_id, answer_id):
     if request.method == "POST":
         body = request.form
-        with conn.cursor() as cursor:
-            cursor.execute(
-                'INSERT INTO "mark" (answer_id, date, mark, teacher_id) VALUES (%s, %s, %s, %s)',
-                (answer_id, body["date"], body["mark"], body["teacher_id"])
-            )
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    'INSERT INTO "mark" (answer_id, date, mark, teacher_id) VALUES (%s, %s, %s, %s)',
+                    (answer_id, body["date"], body["mark"], body["teacher_id"])
+                )
+
+                cursor.execute(
+                    'UPDATE "answer" SET mark = %s WHERE answer.id = %s',
+                    (body["mark"], answer_id)
+                )
+                conn.commit()
+        except psycopg2.Error as e:
+            print(e)
+            conn.rollback()
 
         return redirect(f"/courses/{course_id}", code=302)
 
@@ -181,9 +244,11 @@ def get_mark(course_id, task_id, answer_id):
             cursor.execute('SELECT "max_mark" from "task" WHERE id = %s', (task_id,))
             max_mark = cursor.fetchone()[0]
 
+        default_date = datetime.now().today().strftime("%Y-%m-%d")
+
         return f"""
             <form method="POST">
-                Datetime:    <input type="datetime-local" name="date" /> <br>
+                Datetime:    <input type="date" name="date" value="{default_date}" readonly /> <br>
                 Mark:        <input type="number" name="mark" min="0" max="{max_mark}"/> <br>
                 Teacher ID:  <input type="number" name="teacher_id" /> <br>
     
@@ -193,9 +258,23 @@ def get_mark(course_id, task_id, answer_id):
 
 
 @app.route("/courses/<course_id>/rating", methods=["GET", "POST"])
-def get_rating(course_id, task_id, answer_id):
+def get_rating(course_id):
     if request.method == "POST":
         return abort(404, description="Not Implemented")
+
+    with conn.cursor() as cursor:
+        cursor.execute('''
+             SELECT "user".*, round(AVG("answer".mark),2) AS avg_mark
+             FROM "user" 
+                 JOIN "course_student" ON "user".id = "course_student".student_id 
+                 JOIN "answer" ON "user".id = answer.student_id 
+             WHERE "course_student".course_id = %s 
+             GROUP BY "user".id
+             ORDER BY avg_mark DESC
+             ''', (course_id,)
+        )
+        rating = selector(cursor)
+        return jsonify(rating), 200
 
 
 @app.route('/source_code/')
