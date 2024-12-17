@@ -41,12 +41,12 @@ def user_create():
 
     return """
         <form method="POST">
-            Email:    <input type="email" name="email" /> </br>
-            Password: <input type="password" name="password" /> </br>
-            Name:     <input type="text" name="name" /> </br>
-            Surname:  <input type="text" name="surname" /> </br>
+            Email:    <input type="email" name="email" /> <br>
+            Password: <input type="password" name="password" /> <br>
+            Name:     <input type="text" name="name" /> <br>
+            Surname:  <input type="text" name="surname" /> <br>
             
-            <input type="submit" value="REGISTER" /> </br>
+            <input type="submit" value="REGISTER" /> <br>
         </form>
         """
 
