@@ -48,4 +48,4 @@ if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
 
 
-# todo check bootstrap, progit,
+# todo check bootstrap, progit(3 глави), jinja2, djangogirls, geek for geeks: coupling and cohension
