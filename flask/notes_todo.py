@@ -1,6 +1,8 @@
 
 # todo geeks for geek (data structer, algorithms courses), l&eetcode.com, теория множеств
 
+# todo check bootstrap, progit(3 глави), jinja2, djangogirls, geek for geeks: coupling and cohesion
+
 # todo read flask doc, pep8
 
 #  0 форма
