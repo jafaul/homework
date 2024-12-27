@@ -55,8 +55,8 @@ CREATE TABLE "course_student" (
 CREATE TABLE "lecture" (
     "id" bigserial PRIMARY KEY,
     "course_id" bigserial NOT NULL,
-    "title" VARCHAR(30) NOT NULL,
-    "description" VARCHAR(300),
+    "title" VARCHAR(100) NOT NULL,
+    "description" TEXT,
 
     CONSTRAINT fk_course FOREIGN KEY("course_id") REFERENCES "course"(id)
     )
@@ -70,7 +70,7 @@ CREATE TABLE "lecture" (
     CREATE TABLE "task" (
     "id" bigserial PRIMARY KEY,
     "course_id" bigserial NOT NULL,
-    "description" VARCHAR(300),
+    "description" TEXT,
     "max_mark" smallint NOT NULL DEFAULT 5,
 
     CONSTRAINT fk_course FOREIGN KEY("course_id") REFERENCES "course"(id)
@@ -87,7 +87,7 @@ CREATE TABLE "lecture" (
 CREATE TABLE "answer"(
     "id" bigserial PRIMARY KEY,
     task_id bigserial NOT NULL,
-    "description" VARCHAR(300),
+    "description" TEXT NOT NULL,
     "student_id" bigserial NOT NULL,
     "mark" smallint,
 
@@ -111,7 +111,7 @@ CREATE TABLE "answer"(
 CREATE TABLE "mark" (
     "id" bigserial PRIMARY KEY,
     "answer_id" bigserial NOT NULL,
-    "date" DATE DEFAULT now(),
+    "date" DATE DEFAULT CURRENT_DATE,
     "mark" smallint NOT NULL,
     "teacher_id" bigserial NOT NULL,
 
@@ -121,7 +121,7 @@ CREATE TABLE "mark" (
 ;
 
 -- * Додає дедлайн до ДЗ
-ALTER TABLE "task" ADD "deadline" DATE DEFAULT now();
+ALTER TABLE "task" ADD "deadline" DATE DEFAULT (CURRENT_DATE + INTERVAL '7 days');
 -- * Додає дату здачі до відповіді
-ALTER TABLE "answer" ADD "submission_date" DATE DEFAULT now();
+ALTER TABLE "answer" ADD "submission_date" DATE DEFAULT CURRENT_DATE;
 

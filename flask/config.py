@@ -17,10 +17,10 @@ class Settings(BaseSettings):
 
     DB_HOST: str = os.environ.get("DB_HOST", "localhost")
     DB_PORT: int = os.environ.get("DB_PORT", 5434)
-    DB_NAME: str = os.environ.get("DB_NAME", "kinda_threads")
+    DB_NAME: str = os.environ.get("DB_NAME", "postres")
 
     SECRET_KEY: str = os.environ.get("SECRET_KEY", "")
-    DEBUG: str = os.environ.get("DEBUG", "")
+    DEBUG: bool = os.environ.get("DEBUG", False)
 
     class Config:
         env_file = ".env"
