@@ -1,9 +1,9 @@
 
-# todo geeks for geek (data structer, algorithms courses), l&eetcode.com, теория множеств
+# todo geeks for geek (data structer, algorithms courses), leetcode.com, tcp/ip geek for geeks
 
 # todo check bootstrap, progit(3 глави), jinja2, djangogirls, geek for geeks: coupling and cohesion
 
-# todo read flask doc, pep8
+# todo read flask doc, pep8, /TCP-IP Illustrated Volunme 1-The Protocols.pdf
 
 #  0 форма
    #  нет порядка строк и столбцов(2)

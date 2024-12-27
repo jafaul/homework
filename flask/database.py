@@ -1,9 +1,11 @@
 import psycopg2
 
+from config import config
+
 conn = psycopg2.connect(
-    database="postgres",
-    user="postgres",
-    password="example",
-    host="localhost",
-    port="5432"
+    database=config.DB_NAME,
+    user=config.DB_USERNAME,
+    password=config.DB_PASSWORD,
+    host="db",
+    port=config.DB_PORT
 )

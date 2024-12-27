@@ -1,12 +1,13 @@
 import random
 import string
 from datetime import datetime, timedelta
-from statistics import mean
 
 import psycopg2
 from flask import Flask, request, Response, jsonify, redirect, abort
 
 from database import conn
+from config import config
+
 from tools import selector
 
 app = Flask(__name__)
@@ -321,4 +322,4 @@ def get_random_string():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=config.DEBUG, host=config.APP_HOST, port=config.APP_PORT)
