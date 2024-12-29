@@ -12,7 +12,7 @@ url_object = URL.create(
     port=config.DB_PORT,
 )
 
-engine = create_engine(url_object)
+engine = create_engine(url_object, echo=True)
 
 
 class Base(DeclarativeBase):

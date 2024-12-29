@@ -1,9 +1,11 @@
 import random
 import string
 from datetime import datetime, timedelta
+from time import perf_counter
 
-from flask import Flask, request, Response, jsonify, redirect
-from sqlalchemy.orm import Session, joinedload
+from flask import Flask, request, Response, jsonify, redirect, abort
+from sqlalchemy import func
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from database import engine
 from tools import serialize_list
@@ -26,7 +28,6 @@ def whoami():
 def user_create():
     if request.method == "POST":
         body = request.form
-
         user = User(email=body["email"], password=body["password"], name=body["name"], surname=body["surname"])
         with Session(engine) as session:
             session.add(user)
@@ -50,10 +51,13 @@ def user_create():
 def get_users():
    # https://docs.sqlalchemy.org/en/14/orm/loading_relationships.html
     with Session(engine) as session:
+        start = perf_counter()
         users = session.query(User).options(
-            joinedload(User.courses_as_student),
-            joinedload(User.courses_as_teacher)
+            joinedload(User.courses_as_student),  # joined load for many to many, one to one, many to one
+            selectinload(User.courses_as_teacher)   # select in load for one to many
         ).all()
+
+        print(str(perf_counter() - start))
 
     return jsonify(serialize_list(users, include_relationships=True)), 200
 
@@ -102,19 +106,25 @@ def create_course():
      """
 
 
-@app.route("/courses/<course_id>/", methods=["GET"])
+@app.route("/courses/<int:course_id>/", methods=["GET"])
 def get_course_info(course_id):
     with Session(engine) as session:
         course = session.query(Course).filter(Course.id == course_id).one().as_dict(include_relationships=True)
         lectures = session.query(Lecture).filter(Lecture.course_id == course["id"]).all()
         course["lectures"] = serialize_list(lectures)
-        tasks = session.query(Task).filter(Task.course_id == course["id"]).all()
-        course["tasks"] = serialize_list(tasks)
+        raw_tasks = session.query(Task).filter(Task.course_id == course["id"]).all()
+        tasks = serialize_list(raw_tasks, include_relationships=True)
+        for task in tasks:
+            for answer in task["answers"]:
+                mark = session.query(Mark).filter(Mark.answer_id == answer["id"]).first()
+                if mark:
+                    answer["mark"] = mark.as_dict()
+        course["tasks"] = tasks
 
     return jsonify(course), 200
 
 
-@app.route("/courses/<course_id>/lectures/", methods=["GET", "POST"])
+@app.route("/courses/<int:course_id>/lectures/", methods=["GET", "POST"])
 def add_lectures_to_course(course_id):
     if request.method == "POST":
         body = request.form
@@ -138,22 +148,19 @@ def add_lectures_to_course(course_id):
      """
 
 
-@app.route("/courses/<course_id>/tasks/", methods=["GET", "POST"])
+@app.route("/courses/<int:course_id>/tasks/", methods=["GET", "POST"])
 def task_page(course_id):
     if request.method == "POST":
         body = request.form
         with Session(engine) as session:
-            pass
-        # try:
-        #     with conn.cursor() as cursor:
-        #         cursor.execute(
-        #             'INSERT INTO "task" (course_id, description, max_mark, deadline) VALUES (%s, %s, %s, %s)',
-        #             (course_id, body["description"], body["max_mark"], body["deadline"])
-        #         )
-        #         conn.commit()
-        # except psycopg2.Error as e:
-        #     print(e)
-        #     conn.rollback()
+            task = Task(
+                course_id=course_id,
+                description=body["description"],
+                max_mark=int(body["max_mark"]),
+                deadline=datetime.strptime(body["deadline"], "%Y-%m-%d").date()
+            )
+            session.add(task)
+            session.commit()
 
         return redirect(f"/courses/{course_id}", code=302)
 
@@ -167,91 +174,106 @@ def task_page(course_id):
         </form>
      """
 
-# @app.route("/courses/<course_id>/tasks/<task_id>/answers", methods=["GET", "POST"])
-# def task_answer(course_id, task_id):
-#     if request.method == "POST":
-#         body = request.form
-#         try:
-#             with conn.cursor() as cursor:
-#                 cursor.execute(
-#                     'INSERT INTO "answer" (task_id, description, student_id) VALUES (%s, %s, %s)',
-#                     (task_id, body["description"], body["student_id"])
-#                 )
-#                 conn.commit()
-#         except psycopg2.Error as e:
-#             print(e)
-#             conn.rollback()
-#
-#         return redirect(f"/courses/{course_id}/", code=302)
-#
-#     return """
-#         <form method="POST">
-#             Description:  <input type="text" name="description" /> <br>
-#             Student ID:   <input type="number" name="student_id" /> <br>
-#
-#             <input type="submit" value="ANSWER" /> <br>
-#         </form>
-#      """
-#
-#
-# @app.route("/courses/<course_id>/tasks/<task_id>/answers/<answer_id>/mark", methods=["GET", "POST"])
-# def get_mark(course_id, task_id, answer_id):
-#     if request.method == "POST":
-#         body = request.form
-#         try:
-#             with conn.cursor() as cursor:
-#                 cursor.execute(
-#                     'INSERT INTO "mark" (answer_id, date, mark, teacher_id) VALUES (%s, %s, %s, %s)',
-#                     (answer_id, body["date"], body["mark"], body["teacher_id"])
-#                 )
-#
-#                 cursor.execute(
-#                     'UPDATE "answer" SET mark = %s WHERE answer.id = %s',
-#                     (body["mark"], answer_id)
-#                 )
-#                 conn.commit()
-#         except psycopg2.Error as e:
-#             print(e)
-#             conn.rollback()
-#
-#         return redirect(f"/courses/{course_id}", code=302)
-#
-#     else:
-#         with conn.cursor() as cursor:
-#             cursor.execute('SELECT "max_mark" from "task" WHERE id = %s', (task_id,))
-#             max_mark = cursor.fetchone()[0]
-#
-#         default_date = datetime.now().today().strftime("%Y-%m-%d")
-#
-#         return f"""
-#             <form method="POST">
-#                 Datetime:    <input type="date" name="date" value="{default_date}" readonly /> <br>
-#                 Mark:        <input type="number" name="mark" min="0" max="{max_mark}"/> <br>
-#                 Teacher ID:  <input type="number" name="teacher_id" /> <br>
-#
-#                 <input type="submit" value="SEND" /> <br>
-#             </form>
-#          """
-#
-#
-# @app.route("/courses/<course_id>/rating", methods=["GET", "POST"])
-# def get_rating(course_id):
-#     if request.method == "POST":
-#         return abort(404, description="Not Implemented")
-#
-#     with conn.cursor() as cursor:
-#         cursor.execute('''
-#              SELECT "user".*, round(AVG("answer".mark),2) AS avg_mark
-#              FROM "user"
-#                  JOIN "course_student" ON "user".id = "course_student".student_id
-#                  JOIN "answer" ON "user".id = answer.student_id
-#              WHERE "course_student".course_id = %s
-#              GROUP BY "user".id
-#              ORDER BY avg_mark DESC
-#              ''', (course_id,)
-#         )
-#         rating = selector(cursor)
-#         return jsonify(rating), 200
+
+@app.route("/courses/<int:course_id>/tasks/<int:task_id>/answers", methods=["GET", "POST"])
+def task_answer(course_id: int, task_id: int):
+    if request.method == "POST":
+        body = request.form
+        with Session(engine) as session:
+            answer = Answer(
+                task_id=task_id,
+                description=body["description"],
+                student_id=int(body["student_id"]),
+            )
+            session.add(answer)
+            session.commit()
+
+        return redirect(f"/courses/{course_id}/", code=302)
+
+    return """
+        <form method="POST">
+            Description:  <input type="text" name="description" /> <br>
+            Student ID:   <input type="number" name="student_id" /> <br>
+
+            <input type="submit" value="ANSWER" /> <br>
+        </form>
+     """
+
+
+@app.route("/courses/<int:course_id>/tasks/<int:task_id>/answers/<int:answer_id>/mark", methods=["GET", "POST"])
+def get_mark(course_id: int, task_id: int, answer_id: int):
+    if request.method == "POST":
+        body = request.form
+
+        with Session(engine) as session:
+            start = perf_counter()
+            mark = session.query(Mark).filter(Mark.answer_id == answer_id).first()
+            if mark:
+                mark.teacher_id = int(body["teacher_id"])
+                mark.mark_value = int(body["mark"])
+            else:
+                mark = Mark(
+                    answer_id=answer_id,
+                    mark_value=int(body["mark"]),
+                    date=datetime.strptime(body["date"], "%Y-%m-%d").date(),
+                    teacher_id=int(body["teacher_id"])
+                )
+
+            session.add(mark)
+            session.commit()
+        print(str(perf_counter() - start))
+        return redirect(f"/courses/{course_id}", code=302)
+
+    else:
+        default_date = datetime.now().today().strftime("%Y-%m-%d")
+        with Session(engine) as session:
+            max_mark = session.query(Task).filter(Task.id == task_id).all()
+
+        return f"""
+            <form method="POST">
+                Datetime:    <input type="date" name="date" value="{default_date}" readonly /> <br>
+                Mark:        <input type="number" name="mark" min="0" max="{max_mark}"/> <br>
+                Teacher ID:  <input type="number" name="teacher_id" /> <br>
+
+                <input type="submit" value="SEND" /> <br>
+            </form>
+         """
+
+
+@app.route("/courses/<int:course_id>/rating", methods=["GET", "POST"])
+def get_rating(course_id):
+    if request.method == "POST":
+        return abort(404, description="Not Implemented")
+
+    with Session(engine) as session:
+        avg_mark = func.round(func.avg(Mark.mark_value).label("avg_mark"), 2)
+
+        raw_results = (
+            session.query(
+                User.id,
+                User.name,
+                User.surname,
+                avg_mark
+            )
+            .join(User.courses_as_student)
+            .join(Answer)
+            .join(Mark)
+            .filter(Course.id == course_id)
+            .group_by(User.id)
+            .order_by(avg_mark)
+            .all())
+
+        results = [
+            {
+                "id": raw_result[0],
+                "name": raw_result[1],
+                "surname": raw_result[2],
+                "avg_mark": raw_result[3]
+            }
+            for raw_result in raw_results
+        ]
+
+        return jsonify(results), 200
 
 
 @app.route('/source_code/')

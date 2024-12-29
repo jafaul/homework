@@ -89,7 +89,6 @@ CREATE TABLE "answer"(
     task_id bigserial NOT NULL,
     "description" TEXT NOT NULL,
     "student_id" bigserial NOT NULL,
-    "mark" smallint,
 
     CONSTRAINT fk_task FOREIGN KEY(task_id) REFERENCES "task"(id),
     CONSTRAINT fk_student FOREIGN KEY("student_id") REFERENCES "user"(id)
@@ -112,7 +111,7 @@ CREATE TABLE "mark" (
     "id" bigserial PRIMARY KEY,
     "answer_id" bigserial NOT NULL,
     "date" DATE DEFAULT CURRENT_DATE,
-    "mark" smallint NOT NULL,
+    "mark_value" smallint NOT NULL,
     "teacher_id" bigserial NOT NULL,
 
     CONSTRAINT fk_answer FOREIGN KEY("answer_id") REFERENCES "answer"(id),
