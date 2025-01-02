@@ -7,7 +7,6 @@ from flask import Flask, request, Response, jsonify, redirect, abort
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload, noload
 
-from config import config
 from database import engine
 from models import *
 from tools import serialize_list
@@ -308,7 +307,7 @@ def get_rating(course_id):
 
 @app.route("/source_code/")
 def source_code():
-    with open("app.py", "r") as file:
+    with open("routers.py", "r") as file:
         content = file.read()
         return Response(content, mimetype="text/python")
 
@@ -334,7 +333,3 @@ def get_random_string():
         all_characters += string.digits
 
     return "".join(random.choices(all_characters, k=length))
-
-
-if __name__ == "__main__":
-    app.run(debug=config.DEBUG, host=config.APP_HOST, port=config.APP_PORT)
