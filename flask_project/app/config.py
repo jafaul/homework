@@ -9,17 +9,17 @@ load_dotenv()
 
 class Settings(BaseSettings):
 
-    DB_USERNAME: str = os.environ.get("DB_USERNAME", "")
-    DB_PASSWORD: str = os.environ.get("DB_PASSWORD", "")
+    DB_USERNAME: str = os.environ.get("DB_USERNAME", "postgres")
+    DB_PASSWORD: str = os.environ.get("DB_PASSWORD", "example")
 
     APP_HOST: str = os.environ.get("HOST", "0.0.0.0")
     APP_PORT: int = os.environ.get("PORT", 8000)
 
-    DB_HOST: str = os.environ.get("DB_HOST", "localhost")
-    DB_PORT: int = os.environ.get("DB_PORT", 5434)
-    DB_NAME: str = os.environ.get("DB_NAME", "postres")
+    DB_HOST: str = os.environ.get("DB_HOST", "db")
+    DB_PORT: int = os.environ.get("DB_PORT", 5432)
+    DB_NAME: str = os.environ.get("DB_NAME", "postgres")
 
-    SECRET_KEY: str = os.environ.get("SECRET_KEY", "")
+    SECRET_KEY: str = os.environ.get("SECRET_KEY", "VerySecretKey")
     DEBUG: bool = os.environ.get("DEBUG", False)
 
     DB_URL: str = \
