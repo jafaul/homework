@@ -22,9 +22,9 @@ class Settings(BaseSettings):
     SECRET_KEY: str = os.environ.get("SECRET_KEY", "")
     DEBUG: bool = os.environ.get("DEBUG", False)
 
-    DB_URL: str = (
+    DB_URL: str = \
         f"postgresql+psycopg2://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    )
+
 
     class Config:
         env_file = "../.env"
