@@ -10,7 +10,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: "/bin/bash -c 'python3 main.py'"
+    command: "/bin/bash -c 'alembic upgrade head; python3 main.py'"
 
 
   db:
