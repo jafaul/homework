@@ -1,16 +1,26 @@
 import datetime as dt
 from typing import Optional
 
-from sqlalchemy import ForeignKey, String, SmallInteger, Date, Text, VARCHAR, Column, Table, Integer, BigInteger
+from sqlalchemy import (
+    ForeignKey,
+    String,
+    SmallInteger,
+    Date,
+    Text,
+    VARCHAR,
+    Column,
+    Table,
+    BigInteger,
+)
 from sqlalchemy.dialects.postgresql import OID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
 
 CourseStudent = Table(
-    'course_student',
+    "course_student",
     Base.metadata,
-    Column('id', BigInteger, primary_key=True),
+    Column("id", BigInteger, primary_key=True),
     Column("course_id", BigInteger, ForeignKey("course.id")),
     Column("student_id", BigInteger, ForeignKey("user.id")),
 )
@@ -34,9 +44,14 @@ class Answer(Base):
     student_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     submission_date: Mapped[dt.date] = mapped_column(Date, default=dt.date.today())
 
-    mark: Mapped[Optional["Mark"]] = relationship("Mark", back_populates="answer", uselist=False)
+    mark: Mapped[Optional["Mark"]] = relationship(
+        "Mark", back_populates="answer", uselist=False
+    )
     task: Mapped["Task"] = relationship("Task", uselist=False)
-    student: Mapped["User"] = relationship("User", back_populates="answers", uselist=False)
+    student: Mapped["User"] = relationship(
+        "User", back_populates="answers", uselist=False
+    )
+
 
 class Mark(Base):
     __tablename__ = "mark"
@@ -47,7 +62,9 @@ class Mark(Base):
     mark_value: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     teacher_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
-    answer: Mapped[Answer] = relationship("Answer", back_populates="mark", uselist=False)
+    answer: Mapped[Answer] = relationship(
+        "Answer", back_populates="mark", uselist=False
+    )
 
 
 class Task(Base):
@@ -57,7 +74,9 @@ class Task(Base):
     course_id: Mapped[int] = mapped_column(ForeignKey("course.id"))
     description: Mapped[str] = mapped_column(Text)
     max_mark: Mapped[int] = mapped_column(SmallInteger, default=5, nullable=False)
-    deadline: Mapped[dt.date] = mapped_column(Date, default=dt.date.today() + dt.timedelta(days=7))
+    deadline: Mapped[dt.date] = mapped_column(
+        Date, default=dt.date.today() + dt.timedelta(days=7)
+    )
 
     answers: Mapped[list["Answer"]] = relationship("Answer", back_populates="task")
 
@@ -71,7 +90,9 @@ class Course(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
 
     teacher: Mapped["User"] = relationship(back_populates="courses_as_teacher")
-    students: Mapped[list["User"]] = relationship(secondary=CourseStudent, back_populates="courses_as_student")
+    students: Mapped[list["User"]] = relationship(
+        secondary=CourseStudent, back_populates="courses_as_student"
+    )
 
 
 class User(Base):
@@ -93,4 +114,3 @@ class User(Base):
 
     courses_as_teacher: Mapped[list[Course]] = relationship(back_populates="teacher")
     answers: Mapped[list["Answer"]] = relationship(back_populates="student")
-

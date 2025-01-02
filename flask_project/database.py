@@ -1,18 +1,9 @@
-from sqlalchemy import URL, create_engine
+from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, class_mapper
 
 from config import config
 
-url_object = URL.create(
-    "postgresql+psycopg2",
-    username=config.DB_USERNAME,
-    password=config.DB_PASSWORD,
-    host=config.DB_HOST,
-    database=config.DB_NAME,
-    port=config.DB_PORT,
-)
-
-engine = create_engine(url_object, echo=True)
+engine = create_engine(config.DB_URL, echo=True)
 
 
 class Base(DeclarativeBase):
@@ -29,14 +20,12 @@ class Base(DeclarativeBase):
                 related = getattr(self, relationship.key)
                 if relationship.uselist:
                     data[relationship.key] = [
-                        obj.as_dict() if hasattr(obj, "as_dict") else repr(obj)
-                        for obj in related
+                        obj.as_dict() for obj in related
                     ]
                 else:
-                    data[relationship.key] = (
-                        related.as_dict() if hasattr(related, "as_dict") else repr(related)
-                    )
+                    data[relationship.key] = related.as_dict()
 
         return data
+
 
 Base.metadata.create_all(engine)
