@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, class_mapper
 
-from config import config
+from .config import config
 
 engine = create_engine(config.DB_URL, echo=True)
 

@@ -7,9 +7,9 @@ from flask import Flask, request, Response, jsonify, redirect, abort
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload, noload
 
-from database import engine
-from models import *
-from tools import serialize_list
+from .database import engine
+from .models import *
+from .tools import serialize_list
 
 app = Flask(__name__)
 

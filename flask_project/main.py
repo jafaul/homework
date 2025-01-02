@@ -1,4 +1,4 @@
-from flask_project.app.config import config
+from app.config import config
 from app.routers import *
 
 if __name__ == "__main__":
