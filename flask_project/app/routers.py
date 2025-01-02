@@ -101,7 +101,7 @@ def create_course():
                 description=body["description"],
             )
             students_ids = [
-                int(student_id.strip()) for student_id in body.get("students_ids", [])
+                int(student_id.strip()) for student_id in body.get("students_ids", []).split(",")
             ]
             if students_ids:
                 students = session.query(User).filter(User.id.in_(students_ids)).all()
@@ -117,7 +117,7 @@ def create_course():
         <form method="POST">
             Title:        <input type="text" name="title" /> <br>
             Teacher ID:   <input type="number" name="teacher_id" /> <br>
-            Students IDs: <input type="text" name="students_ids" placeholder="1, 2, 3" /> <br>
+            Students IDs: <input type="text" name="students_ids" placeholder="1,2,3" /> <br>
             Description:   <input type="text" name="description" value="" /> <br>
 
             <input type="submit" value="CREATE" /> <br>
@@ -234,7 +234,7 @@ def task_answer(course_id: int, task_id: int):
     "/courses/<int:course_id>/tasks/<int:task_id>/answers/<int:answer_id>/mark/",
     methods=["GET", "POST"],
 )
-def get_mark(course_id: int, task_id: int, answer_id: int):
+def set_mark(course_id: int, task_id: int, answer_id: int):
     if request.method == "POST":
         body = request.form
 
@@ -243,11 +243,11 @@ def get_mark(course_id: int, task_id: int, answer_id: int):
             mark = session.query(Mark).filter(Mark.answer_id == answer_id).first()
             if mark:
                 mark.teacher_id = int(body["teacher_id"])
-                mark.mark_value = int(body["mark"])
+                mark.mark_value = int(body["mark_value"])
             else:
                 mark = Mark(
                     answer_id=answer_id,
-                    mark_value=int(body["mark"]),
+                    mark_value=int(body["mark_value"]),
                     date=datetime.strptime(body["date"], "%Y-%m-%d").date(),
                     teacher_id=int(body["teacher_id"]),
                 )
@@ -260,12 +260,12 @@ def get_mark(course_id: int, task_id: int, answer_id: int):
     else:
         default_date = datetime.now().today().strftime("%Y-%m-%d")
         with Session(engine) as session:
-            max_mark = session.query(Task).filter(Task.id == task_id).all()
+            max_mark = session.query(Task).filter(Task.id == task_id).first().max_mark
 
         return f"""
             <form method="POST">
                 Datetime:    <input type="date" name="date" value="{default_date}" readonly /> <br>
-                Mark:        <input type="number" name="mark" min="0" max="{max_mark}"/> <br>
+                Mark:        <input type="number" name="mark_value" min="0" max="{max_mark}"/> <br>
                 Teacher ID:  <input type="number" name="teacher_id" /> <br>
 
                 <input type="submit" value="SEND" /> <br>
@@ -288,7 +288,7 @@ def get_rating(course_id):
             .join(Mark)
             .filter(Course.id == course_id)
             .group_by(User.id)
-            .order_by(avg_mark)
+            .order_by(avg_mark.desc())
             .all()
         )
 
