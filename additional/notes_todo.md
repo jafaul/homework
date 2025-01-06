@@ -1,7 +1,8 @@
 
+
 # todo geeks for geek (data structer, algorithms courses), leetcode.com, tcp/ip geek for geeks
 
-# todo check bootstrap, progit(3 глави), jinja2, djangogirls, geek for geeks: coupling and cohesion
+# todo check bootstrap, progit(3 глави), djangogirls, geek for geeks: coupling and cohesion
 
 # todo read flask doc, pep8, /TCP-IP Illustrated Volunme 1-The Protocols.pdf
 
@@ -26,3 +27,5 @@
 # 5 nf (нужно углубляться в специфику исходных данных)
 # 6 nf для хронологических бд
 # де нормализация для ускорения в крайнем случае)
+
+
