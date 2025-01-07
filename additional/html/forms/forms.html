@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form practice</title>
+</head>
+<body>
+<fieldset>
+    <legend>Create course</legend>
+<form action="http://172.24.0.3:8000/register/" method="post">
+    <label for="input_title">
+        Title:        <input id='input_title' type="text" name="title" /> <br>
+    </label>
+    <label for="input_teacher_id">
+        Teacher ID:   <input id='input_teacher_id' type="number" name="teacher_id" /> <br>
+    </label>
+    <label for="input_students_ids">
+        Students IDs: <input id='input_students_ids' type="text" name="students_ids" placeholder="1,2,3" /> <br>
+    </label>
+
+    <label for="desc_form">
+        Description: <br>
+    <textarea id='desc_form' name="description" rows="10" cols="40"></textarea> <br>
+    </label>
+
+    <label>
+        <select name="type" size="3" multiple>
+            <option></option>
+            <option value="course_1">Course 1</option>
+            <option value="course_2">Course 2</option>
+            <option value="course_3">Course 3</option>
+        </select> <br>
+    </label>
+
+    <label for="form-checkbox">Allow Multi students</label>
+    <input type="checkbox" id="form-checkbox" /> <br>
+
+
+    <input type="submit" value="CREATE" /> <br>
+</form>
+</fieldset>
+
+</body>
+
+</html>

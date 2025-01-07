@@ -3,7 +3,8 @@ import string
 from datetime import datetime, timedelta
 from time import perf_counter
 
-from flask import Flask, request, Response, jsonify, redirect, abort
+from flask import Flask, request, Response, jsonify, redirect, abort, render_template
+from jinja2 import Template
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload, noload
 
@@ -12,6 +13,36 @@ from .models import *
 from .tools import serialize_list
 
 app = Flask(__name__)
+
+@app.route("/", methods=["GET"])
+def index():
+    cities = [
+        {'id': 1, 'city': 'Riga'},
+        {'id': 5, 'city': 'Kyiv'},
+        {'id': 7, 'city': 'Warsaw'},
+        {'id': 8, 'city': 'Munich'},
+        {'id': 11, 'city': 'Lutsk'}
+    ]
+    #  # - is str by str
+    link = ''' 
+       <select name="cities">
+
+       {% for c in cities -%}
+
+           {% if c.id > 6 -%}
+
+                <option value="{{ c.id }}">{{ c.city }}</option>
+           {% else -%}
+                 {{ c.city }}
+           {% endif -%}
+       {% endfor -%}
+
+       </select>
+
+       '''
+    return Template(link).render(cities=cities)
+
+    return render_template("base.html")
 
 
 @app.route("/whoami/", methods=["GET"])
@@ -39,16 +70,7 @@ def user_create():
 
         return redirect("/users/", code=302)
 
-    return """
-        <form method="POST">
-            Email:    <input type="email" name="email" /> <br>
-            Password: <input type="password" name="password" /> <br>
-            Name:     <input type="text" name="name" /> <br>
-            Surname:  <input type="text" name="surname" /> <br>
-
-            <input type="submit" value="REGISTER" /> <br>
-        </form>
-        """
+    return render_template("register.html")
 
 
 @app.route("/users/", methods=["GET"])
