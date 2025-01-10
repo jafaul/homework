@@ -55,8 +55,8 @@ CREATE TABLE "course_student" (
 CREATE TABLE "lecture" (
     "id" bigserial PRIMARY KEY,
     "course_id" bigserial NOT NULL,
-    "title" VARCHAR(30) NOT NULL,
-    "description" VARCHAR(300),
+    "title" VARCHAR(100) NOT NULL,
+    "description" TEXT,
 
     CONSTRAINT fk_course FOREIGN KEY("course_id") REFERENCES "course"(id)
     )
@@ -70,7 +70,7 @@ CREATE TABLE "lecture" (
     CREATE TABLE "task" (
     "id" bigserial PRIMARY KEY,
     "course_id" bigserial NOT NULL,
-    "description" VARCHAR(300),
+    "description" TEXT,
     "max_mark" smallint NOT NULL DEFAULT 5,
 
     CONSTRAINT fk_course FOREIGN KEY("course_id") REFERENCES "course"(id)
@@ -87,9 +87,8 @@ CREATE TABLE "lecture" (
 CREATE TABLE "answer"(
     "id" bigserial PRIMARY KEY,
     task_id bigserial NOT NULL,
-    "description" VARCHAR(300),
+    "description" TEXT NOT NULL,
     "student_id" bigserial NOT NULL,
-    "mark" smallint,
 
     CONSTRAINT fk_task FOREIGN KEY(task_id) REFERENCES "task"(id),
     CONSTRAINT fk_student FOREIGN KEY("student_id") REFERENCES "user"(id)
@@ -111,8 +110,8 @@ CREATE TABLE "answer"(
 CREATE TABLE "mark" (
     "id" bigserial PRIMARY KEY,
     "answer_id" bigserial NOT NULL,
-    "date" DATE DEFAULT now(),
-    "mark" smallint NOT NULL,
+    "date" DATE DEFAULT CURRENT_DATE,
+    "mark_value" smallint NOT NULL,
     "teacher_id" bigserial NOT NULL,
 
     CONSTRAINT fk_answer FOREIGN KEY("answer_id") REFERENCES "answer"(id),
@@ -121,17 +120,7 @@ CREATE TABLE "mark" (
 ;
 
 -- * Додає дедлайн до ДЗ
-ALTER TABLE "task" ADD "deadline" DATE DEFAULT now();
+ALTER TABLE "task" ADD "deadline" DATE DEFAULT (CURRENT_DATE + INTERVAL '7 days');
 -- * Додає дату здачі до відповіді
-ALTER TABLE "answer" ADD "submission_date" DATE DEFAULT now();
-
--- todo check poetry
-
--- todo check  query analyzer
-
--- todo geeks for geek (data structer, algorithms courses), leetcode.com
-
--- todo  нормальна форма
-
--- todo read flask doc, pep8, ACID+, db transactions+, isolations
+ALTER TABLE "answer" ADD "submission_date" DATE DEFAULT CURRENT_DATE;
 

@@ -6,26 +6,27 @@ services:
       - .:/src
     working_dir: /src
     ports:
-      - "5000:5000"
+      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
-    command: "/bin/bash -c 'python3 app.py'"
+    command: "/bin/bash -c 'alembic upgrade head; python3 main.py'"
 
 
   db:
     image: postgres
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: example
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:${DB_PORT}"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
       interval: 1s
       timeout: 5s
       retries: 10
