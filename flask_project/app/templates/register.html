@@ -1,20 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form practice</title>
-</head>
-<body>
-<!--<form action="http://172.24.0.3:8000/register/" method="post">-->
-<form method="post">
-    Email:    <input type="email" name="email" placeholder="Enter email" required/> <br>
-    Password: <input type="password" name="password" required /> <br>
-    Name:     <input type="text" name="name" placeholder="Enter your name" required /> <br>
-    Surname:  <input type="text" name="surname" placeholder="Enter your surname" required/> <br>
+{% extends 'base.html' %}
+{% from 'dialogs.html' import input_form %}
 
-    <input type="submit" value="REGISTER" /> <br>
-</form>
-</body>
-</html>
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block content -%}
+{{ super() }}
+
+    {{ input_form(fields, submit_name=submit_name) }}
+
+{% endblock content %}
+
+{% block footer %} {{ super() }} {%  endblock footer %}
+

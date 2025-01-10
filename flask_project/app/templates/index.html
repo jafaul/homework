@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block content -%}
+{{ super() }}
+
+    <img class="welcome-picture" src="{{ url_for('static', filename='Stay.jpg') }}" alt="There had to be a picture">
+{% endblock content %}
+
+{% block footer %} {{ super() }} {%  endblock footer %}

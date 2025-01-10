@@ -1,10 +1,10 @@
 import random
 import string
 from datetime import datetime, timedelta
+from functools import lru_cache
 from time import perf_counter
 
-from flask import Flask, request, Response, jsonify, redirect, abort, render_template
-from jinja2 import Template
+from flask import Flask, request, Response, jsonify, redirect, abort, render_template, url_for
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload, noload
 
@@ -14,35 +14,19 @@ from .tools import serialize_list
 
 app = Flask(__name__)
 
+@lru_cache
+def get_menu():
+    menu = [
+        {"url": url_for("get_courses", _external=True), "name": "Courses"},
+        {"url": url_for("get_users", _external=True), "name": "Users"},
+        {"url": url_for("user_create", _external=True), "name": "Sign up"},
+        {"url": url_for("create_course", _external=True), "name": "Create Course"},
+    ]
+    return menu
+
 @app.route("/", methods=["GET"])
 def index():
-    cities = [
-        {'id': 1, 'city': 'Riga'},
-        {'id': 5, 'city': 'Kyiv'},
-        {'id': 7, 'city': 'Warsaw'},
-        {'id': 8, 'city': 'Munich'},
-        {'id': 11, 'city': 'Lutsk'}
-    ]
-    #  # - is str by str
-    link = ''' 
-       <select name="cities">
-
-       {% for c in cities -%}
-
-           {% if c.id > 6 -%}
-
-                <option value="{{ c.id }}">{{ c.city }}</option>
-           {% else -%}
-                 {{ c.city }}
-           {% endif -%}
-       {% endfor -%}
-
-       </select>
-
-       '''
-    return Template(link).render(cities=cities)
-
-    return render_template("base.html")
+    return render_template("index.html", menu=get_menu())
 
 
 @app.route("/whoami/", methods=["GET"])
@@ -70,7 +54,15 @@ def user_create():
 
         return redirect("/users/", code=302)
 
-    return render_template("register.html")
+    fields = [
+        {"title": "Email", "type": "email", "name": "email", "is_required": True},
+        {"title": "Password", "type": "password", "name": "password", "is_required": True},
+        {"title": "Name", "type": "name", "name": "name", "is_required": True},
+        {"title": "Surname", "type": "surname", "name": "surname", "is_required": True}
+    ]
+
+    return render_template(
+        "register.html", title="Sign Up", fields=fields, submit_name="Sign Up", menu=get_menu())
 
 
 @app.route("/users/", methods=["GET"])

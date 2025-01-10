@@ -1,0 +1,120 @@
+html, body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: flex; /* Flexbox for the layout */
+    flex-direction: column; /* Stack elements vertically */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    color: #0059b2;
+    text-decoration: none;
+}
+
+a:hover {
+  color: #CC0000;
+    text-decoration: underline;
+}
+
+.clear {
+    clear: both;
+}
+
+ul.mainmenu {
+    list-style: none;
+    background: #3f4137;
+    margin: 0;
+    padding: 8px 0;
+    color: #fdc073;
+    font-size: 20px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+}
+
+ul.mainmenu li {
+    float: left;
+    margin: 18px 40px
+}
+
+ul.mainmenu li a {
+    color: #fdc073
+}
+
+ul.mainmenu li a:hover {
+    color: #fda83d
+}
+
+div.content {
+    margin: 10px;
+}
+
+.form-contact label {
+    display: inline-block;
+    min-width: 80px;
+}
+
+.form-contact p {
+    margin: 10px 0 10px 0;
+}
+
+.form-contact input[type=submit], textarea {
+    font-size: 16px;
+}
+
+.flash {padding: 10px}
+.flash.success {
+    border: 1px solid #21db56;
+}
+
+div.content {
+    flex: 1; /* Allows the content to expand and push the footer */
+    margin: 10px;
+}
+
+/* Footer Styles */
+footer {
+    background: #3f4137;
+    color: #fdc073;
+    text-align: center;
+    padding: 20px 0;
+    position: relative;
+    width: 100%;
+    bottom: 0;
+}
+
+footer p {
+    margin: 0;
+    font-size: 16px;
+}
+
+footer a {
+    color: #fdc073;
+}
+
+footer a:hover {
+    color: #fda83d;
+}
+
+.welcome-picture {
+    max-width: 100%;
+    max-height: 50vh;
+    object-fit: cover;
+    margin: auto;
+}
+
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+fieldset{
+  width: 40%
+}

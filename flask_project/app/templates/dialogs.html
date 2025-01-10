@@ -1,0 +1,17 @@
+{% macro input_form(fields, submit_name='Submit') -%}
+
+<fieldset>
+<form method="post">
+    {% for field in fields %}
+    <label for="{{ field.name }}"> {{ field.title }} </label>
+        {% if field.is_required %}
+            <input class="form-field" id={{ field.name }} type={{ field.type }} name="{{ field.name }}" required/> <br>
+        {% else %}
+            <input class="form-field" id={{ field.name }} type={{ field.type }} name="{{ field.name }}"/> <br>
+        {% endif %}
+    {% endfor %}
+
+    <input type="submit" value={{ submit_name }} /> <br>
+</form>
+</fieldset>
+{%- endmacro %}
