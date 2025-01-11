@@ -13,7 +13,6 @@ body {
 }
 
 a {
-    color: #0059b2;
     text-decoration: none;
 }
 
@@ -22,9 +21,9 @@ a:hover {
     text-decoration: underline;
 }
 
-.clear {
-    clear: both;
-}
+/*.clear {*/
+/*    clear: both;*/
+/*}*/
 
 ul.mainmenu {
     list-style: none;
@@ -51,27 +50,27 @@ ul.mainmenu li a:hover {
     color: #fda83d
 }
 
-div.content {
-    margin: 10px;
-}
+/*div.content {*/
+/*    margin: 10px;*/
+/*}*/
 
-.form-contact label {
-    display: inline-block;
-    min-width: 80px;
-}
+/*.form-contact label {*/
+/*    display: inline-block;*/
+/*    min-width: 80px;*/
+/*}*/
 
-.form-contact p {
-    margin: 10px 0 10px 0;
-}
+/*.form-contact p {*/
+/*    margin: 10px 0 10px 0;*/
+/*}*/
 
-.form-contact input[type=submit], textarea {
-    font-size: 16px;
-}
+/*.form-contact input[type=submit], textarea {*/
+/*    font-size: 16px;*/
+/*}*/
 
-.flash {padding: 10px}
-.flash.success {
-    border: 1px solid #21db56;
-}
+/*.flash {padding: 10px}*/
+/*.flash.success {*/
+/*    border: 1px solid #21db56;*/
+/*}*/
 
 div.content {
     flex: 1; /* Allows the content to expand and push the footer */
@@ -117,4 +116,89 @@ form {
 
 fieldset{
   width: 40%
+}
+
+/*users tables*/
+
+/* General container styles */
+.container {
+    margin: 20px auto;
+    padding: 15px;
+    max-width: 100%;
+}
+
+/* Table styles */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table th,
+.table td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #3f4137;
+    color: #fdc073;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+/* List inside table cells */
+.courses ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin: 0;
+}
+
+.courses li a {
+    text-decoration: none;
+    color: #3f4137;
+}
+
+
+.courses li a:hover {
+    color: #CC0000;
+    text-decoration: underline;
+}
+
+
+.courses li a:hover {
+    text-decoration: underline;
+}
+
+
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .table {
+        font-size: 14px;
+    }
+
+    .table th,
+    .table td {
+        padding: 10px;
+    }
+}
+
+
+/*courses*/
+#students-list {
+    list-style-type: none;
+    padding-left: 20px;
+    margin: 0;
 }

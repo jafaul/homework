@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %} {{ title }} {% endblock %}
+
+{% block content -%}
+{{ super() }}
+
+<div class="container first-container col-sm-12 pull-left">
+  <h1>Courses</h1>
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Teacher</th>
+        <th>Description</th>
+        <th>Students</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for course in courses %}
+        <tr class="row">
+            <td>
+                <a href="{{ url_for('get_course_info', course_id=course.id) }}">{{ course.title }}</a>
+            </td>
+
+            <td>
+                {{ course.teacher.name + " " + course.teacher.surname}}
+            </td>
+
+            <td>{{ course.description }}</td>
+            <td>
+            {% if course.students %}
+                <ul id="students-list">
+                    {% for student in course.students %}
+                        <li>{{ student.name + " " + student.surname }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock content %}
+
+{% block footer %} {{ super() }} {%  endblock footer %}
+

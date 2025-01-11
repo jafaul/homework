@@ -3,7 +3,12 @@
 <fieldset>
 <form method="post">
     {% for field in fields %}
-    <label for="{{ field.name }}"> {{ field.title }} </label>
+    <label for="{{ field.name }}">
+            {{ field.title }}
+        {% if field.is_required %}
+            <span class="required">*</span>
+        {%  endif %}
+         </label>
         {% if field.is_required %}
             <input class="form-field" id={{ field.name }} type={{ field.type }} name="{{ field.name }}" required/> <br>
         {% else %}
@@ -14,4 +19,14 @@
     <input type="submit" value={{ submit_name }} /> <br>
 </form>
 </fieldset>
+
+<style>
+    .required {
+        color: red;
+        font-size: 1em;
+        font-weight: bold;
+        margin-left: 5px;
+    }
+</style>
 {%- endmacro %}
+

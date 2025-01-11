@@ -17,6 +17,7 @@ app = Flask(__name__)
 @lru_cache
 def get_menu():
     menu = [
+        {"url": url_for("index", _external=True), "name": "Home"},
         {"url": url_for("get_courses", _external=True), "name": "Courses"},
         {"url": url_for("get_users", _external=True), "name": "Users"},
         {"url": url_for("user_create", _external=True), "name": "Sign up"},
@@ -58,7 +59,8 @@ def user_create():
         {"title": "Email", "type": "email", "name": "email", "is_required": True},
         {"title": "Password", "type": "password", "name": "password", "is_required": True},
         {"title": "Name", "type": "name", "name": "name", "is_required": True},
-        {"title": "Surname", "type": "surname", "name": "surname", "is_required": True}
+        {"title": "Surname", "type": "surname", "name": "surname", "is_required": True},
+        {"title": "Phone number", "type": "phone_number", "name": "phone_number", "is_required": False},
     ]
 
     return render_template(
@@ -83,13 +85,7 @@ def get_users():
         )
 
         print(str(perf_counter() - start))
-
-    return (
-        jsonify(
-            serialize_list(users, include_relationships=True, exclude=("answers",))
-        ),
-        200,
-    )
+    return render_template("users.html", users=users, menu=get_menu())
 
 
 @app.route("/courses/", methods=["GET"])
@@ -100,8 +96,7 @@ def get_courses():
             .options(joinedload(Course.teacher), joinedload(Course.students))
             .all()
         )
-
-    return jsonify(serialize_list(courses, include_relationships=True)), 200
+    return render_template("courses.html", courses=courses, menu=get_menu())
 
 
 @app.route("/courses/create/", methods=["GET", "POST"])
@@ -138,6 +133,8 @@ def create_course():
         </form>
      """
 
+
+    return render_template("create_course.html", )
 
 @app.route("/courses/<int:course_id>/", methods=["GET"])
 def get_course_info(course_id):
