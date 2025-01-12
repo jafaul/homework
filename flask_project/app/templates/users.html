@@ -1,3 +1,4 @@
+{%  from 'dialogs.html' import add_link_img %}
 {% extends 'base.html' %}
 {% block title %} {{ title }} {% endblock %}
 
@@ -5,10 +6,10 @@
 {{ super() }}
 
 <div class="container first-container col-sm-12 pull-left">
-  <h1>Users</h1>
   <table class="table table-condensed">
     <thead>
       <tr>
+        <th>ID</th>
         <th>Fullname</th>
         <th>Email</th>
         <th>Phone number</th>
@@ -19,6 +20,7 @@
     <tbody>
     {% for user in users %}
         <tr class="row">
+            <td>{{ user.id }}</td>
             <td>{{ user.name + " " + user.surname}}</td>
             <td>{{ user.email }}</td>
             <td>
@@ -30,7 +32,7 @@
                 {% if user.courses_as_teacher %}
                 <ul>
                 {% for course in user.courses_as_teacher %}
-                   <li><a href="{{ url_for('get_course_info', course_id=course.id) }}">{{ course.title }}</a></li>
+                   <li><a href="{{ url_for('get_course_info', course_id=course.id) }}">{{ course.title }} {{ add_link_img() }}</a></li>
                 {% endfor %}
                 </ul>
                 {% endif %}
@@ -39,7 +41,7 @@
                 {% if user.courses_as_student %}
                 <ul>
                 {% for course in user.courses_as_student %}
-                   <li><a href="{{ url_for('get_course_info', course_id=course.id) }}">{{ course.title }}</a></li>
+                   <li><a href="{{ url_for('get_course_info', course_id=course.id) }}">{{ course.title }} {{ add_link_img() }}</a></li>
                 {% endfor %}
                 </ul>
                 {% endif %}

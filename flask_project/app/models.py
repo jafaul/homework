@@ -34,6 +34,8 @@ class Lecture(Base):
     title: Mapped[str] = mapped_column(String(100))
     description: Mapped[str] = mapped_column(Text, nullable=True)
 
+    course: Mapped["Course"] = relationship("Course", back_populates="lectures")
+
 
 class Answer(Base):
     __tablename__ = "answer"
@@ -65,6 +67,9 @@ class Mark(Base):
     answer: Mapped[Answer] = relationship(
         "Answer", back_populates="mark", uselist=False
     )
+    teacher: Mapped["User"] = relationship(
+        "User", back_populates="marks", uselist=False
+    )
 
 
 class Task(Base):
@@ -72,6 +77,7 @@ class Task(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     course_id: Mapped[int] = mapped_column(ForeignKey("course.id"))
+    title: Mapped[str] = mapped_column(String(100), nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     max_mark: Mapped[int] = mapped_column(SmallInteger, default=5)
     deadline: Mapped[dt.date] = mapped_column(
@@ -79,6 +85,7 @@ class Task(Base):
     )
 
     answers: Mapped[list["Answer"]] = relationship("Answer", back_populates="task")
+    course: Mapped["Course"] = relationship("Course", back_populates="tasks")
 
 
 class Course(Base):
@@ -93,6 +100,8 @@ class Course(Base):
     students: Mapped[list["User"]] = relationship(
         secondary=CourseStudent, back_populates="courses_as_student"
     )
+    lectures: Mapped[list["Lecture"]] = relationship("Lecture", back_populates='course')
+    tasks: Mapped[list["Task"]] = relationship("Task", back_populates="course")
 
 
 class User(Base):
@@ -114,3 +123,4 @@ class User(Base):
 
     courses_as_teacher: Mapped[list[Course]] = relationship(back_populates="teacher")
     answers: Mapped[list["Answer"]] = relationship(back_populates="student")
+    marks: Mapped[list["Mark"]] = relationship("Mark", back_populates="teacher")

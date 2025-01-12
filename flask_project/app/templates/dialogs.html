@@ -1,23 +1,23 @@
 {% macro input_form(fields, submit_name='Submit') -%}
+<fieldset id="input-default-form">
+    <form method="post">
+        {% for field in fields %}
+            <label for="{{ field.name }}">
+                {{ field.title }}
+                {% if field.is_required %}
+                    <span class="required">*</span>
+                {% endif %}
+            </label>
 
-<fieldset>
-<form method="post">
-    {% for field in fields %}
-    <label for="{{ field.name }}">
-            {{ field.title }}
-        {% if field.is_required %}
-            <span class="required">*</span>
-        {%  endif %}
-         </label>
-        {% if field.is_required %}
-            <input class="form-field" id={{ field.name }} type={{ field.type }} name="{{ field.name }}" required/> <br>
-        {% else %}
-            <input class="form-field" id={{ field.name }} type={{ field.type }} name="{{ field.name }}"/> <br>
-        {% endif %}
-    {% endfor %}
+            {% if field.name != "description" %}
+                {{ render_field(field) }}
+            {% else %}
+                {{ render_textarea(field) }}
+            {% endif %}
+        {% endfor %}
 
-    <input type="submit" value={{ submit_name }} /> <br>
-</form>
+        <input type="submit" value="{{ submit_name }}" /> <br>
+    </form>
 </fieldset>
 
 <style>
@@ -30,3 +30,29 @@
 </style>
 {%- endmacro %}
 
+{% macro render_field(field) %}
+    <input class="form-field"
+           id="{{ field.name }}"
+           type="{{ field.type }}"
+           name="{{ field.name }}"
+           {% if field.is_required %}required{% endif %}
+           {% if field.placeholder %}placeholder="{{ field.placeholder }}"{% endif %} />
+    <br>
+{% endmacro %}
+
+
+{% macro render_textarea(field) %}
+    <textarea id="desc" name="{{ field.name }}" rows="4" cols="30" {% if field.is_required %}required{% endif %}></textarea>
+{% endmacro %}
+
+
+{% macro add_link_img() %}
+        <img src="../static/url.jpg" alt="" style="width:10px; background: none; margin-top: -20px; ">
+{% endmacro %}
+
+
+{% macro add_button(url, method, text, id="") %}
+     <form action="{{ url }}" method="{{ method }}">
+        <button type="submit" class="btn btn-primary" id="{{ id }}">{{ text }}</button>
+    </form>
+{% endmacro %}

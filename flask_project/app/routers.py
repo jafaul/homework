@@ -5,7 +5,7 @@ from functools import lru_cache
 from time import perf_counter
 
 from flask import Flask, request, Response, jsonify, redirect, abort, render_template, url_for
-from sqlalchemy import func
+from sqlalchemy import func, desc
 from sqlalchemy.orm import Session, joinedload, selectinload, noload
 
 from .database import engine
@@ -19,15 +19,15 @@ def get_menu():
     menu = [
         {"url": url_for("index", _external=True), "name": "Home"},
         {"url": url_for("get_courses", _external=True), "name": "Courses"},
+        {"url": url_for("create_course", _external=True), "name": "Create Course"},
         {"url": url_for("get_users", _external=True), "name": "Users"},
         {"url": url_for("user_create", _external=True), "name": "Sign up"},
-        {"url": url_for("create_course", _external=True), "name": "Create Course"},
     ]
     return menu
 
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html", menu=get_menu())
+    return render_template("index.html", menu=get_menu(), title="Welcome to our school!")
 
 
 @app.route("/whoami/", methods=["GET"])
@@ -81,11 +81,11 @@ def get_users():
                 selectinload(User.courses_as_teacher),  # select in load for one to many
                 noload(User.answers),  # return answers: []
             )
-            .all()
+            .order_by(desc(User.id)).all()
         )
 
         print(str(perf_counter() - start))
-    return render_template("users.html", users=users, menu=get_menu())
+    return render_template("users.html", users=users, menu=get_menu(), title="Users")
 
 
 @app.route("/courses/", methods=["GET"])
@@ -94,15 +94,16 @@ def get_courses():
         courses = (
             session.query(Course)
             .options(joinedload(Course.teacher), joinedload(Course.students))
-            .all()
+            .order_by(desc(Course.id)).all()
         )
-    return render_template("courses.html", courses=courses, menu=get_menu())
+    return render_template("courses.html", courses=courses, menu=get_menu(), title="Courses")
 
 
 @app.route("/courses/create/", methods=["GET", "POST"])
 def create_course():
     if request.method == "POST":
         body = request.form
+        print(body)
         with Session(engine) as session:
             course = Course(
                 teacher_id=int(body["teacher_id"]),
@@ -122,45 +123,68 @@ def create_course():
 
         return redirect(f"/courses/{course_id}", 302)
 
-    return """
-        <form method="POST">
-            Title:        <input type="text" name="title" /> <br>
-            Teacher ID:   <input type="number" name="teacher_id" /> <br>
-            Students IDs: <input type="text" name="students_ids" placeholder="1,2,3" /> <br>
-            Description:   <input type="text" name="description" value="" /> <br>
 
-            <input type="submit" value="CREATE" /> <br>
-        </form>
-     """
+    fields = [
+        {"title": "Title of course", "type": "text", "name": "title", "is_required": True},
+        {"title": "Teacher's ID", "type": "text", "name": "teacher_id", "is_required": True},
+        {"title": "Students' IDs", "type": "text", "name": "students_ids", "is_required": True, "placeholder": "1,2,3"},
+        {"title": "Description", "type": "text", "name": "description", "is_required": False},
+    ]
+    return render_template(
+        "create_course.html", title="Create Course", fields=fields, submit_name="Create", menu=get_menu())
 
-
-    return render_template("create_course.html", )
 
 @app.route("/courses/<int:course_id>/", methods=["GET"])
 def get_course_info(course_id):
     with Session(engine) as session:
         course = (
             session.query(Course)
+            .options(
+                joinedload(Course.lectures),
+                joinedload(Course.tasks)
+                .joinedload(Task.answers)
+                .joinedload(Answer.mark)
+                .noload(Mark.teacher),
+                joinedload(Course.teacher)
+        )
             .filter(Course.id == course_id)
             .one()
-            .as_dict(include_relationships=True)
         )
-        lectures = (
-            session.query(Lecture).filter(Lecture.course_id == course["id"]).all()
-        )
-        course["lectures"] = serialize_list(lectures)
-        raw_tasks = session.query(Task).filter(Task.course_id == course["id"]).all()
-        tasks = serialize_list(raw_tasks, include_relationships=True)
-        for task in tasks:
-            for answer in task["answers"]:
-                mark = (
-                    session.query(Mark).filter(Mark.answer_id == answer["id"]).first()
-                )
-                if mark:
-                    answer["mark"] = mark.as_dict()
-        course["tasks"] = tasks
 
-    return jsonify(course), 200
+        serialized_lectures = [
+            {
+                "title": lecture.title,
+                "description": lecture.description,
+            }
+            for lecture in course.lectures
+        ]
+
+        serialized_tasks = []
+        for task in course.tasks:
+            task_dict = {
+                "id": task.id,
+                "title": task.title,
+                "max_mark": task.max_mark,
+                "deadline": task.deadline,
+                "description": task.description,
+                "answers": [
+                    {
+                        "id": answer.id,
+                        "student_name": f"{answer.student.name} {answer.student.surname}",
+                        "description": answer.description,
+                        "submission_date": answer.submission_date,
+                        "mark": answer.mark.mark_value if answer.mark else "Pending to review",
+                        "teacher_name": f"{answer.mark.teacher.name} {answer.mark.teacher.surname}"
+                                        if answer.mark else "Pending to review",
+                    }
+                    for answer in task.answers
+                ],
+            }
+            serialized_tasks.append(task_dict)
+        print(serialized_tasks)
+    return render_template(
+        "course.html", menu=get_menu(), course=course,
+        title=course.title, tasks=serialized_tasks, lectures=serialized_lectures)
 
 
 @app.route("/courses/<int:course_id>/lectures/", methods=["GET", "POST"])

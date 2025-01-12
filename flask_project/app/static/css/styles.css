@@ -1,4 +1,4 @@
-html, body {
+html {
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
     padding: 0;
@@ -8,8 +8,15 @@ html, body {
 }
 
 body {
-    display: flex;
+    font-family: Arial, Helvetica, sans-serif;
     flex-direction: column;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: flex;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 a {
@@ -21,9 +28,6 @@ a:hover {
     text-decoration: underline;
 }
 
-/*.clear {*/
-/*    clear: both;*/
-/*}*/
 
 ul.mainmenu {
     list-style: none;
@@ -48,33 +52,6 @@ ul.mainmenu li a {
 
 ul.mainmenu li a:hover {
     color: #fda83d
-}
-
-/*div.content {*/
-/*    margin: 10px;*/
-/*}*/
-
-/*.form-contact label {*/
-/*    display: inline-block;*/
-/*    min-width: 80px;*/
-/*}*/
-
-/*.form-contact p {*/
-/*    margin: 10px 0 10px 0;*/
-/*}*/
-
-/*.form-contact input[type=submit], textarea {*/
-/*    font-size: 16px;*/
-/*}*/
-
-/*.flash {padding: 10px}*/
-/*.flash.success {*/
-/*    border: 1px solid #21db56;*/
-/*}*/
-
-div.content {
-    flex: 1; /* Allows the content to expand and push the footer */
-    margin: 10px;
 }
 
 /* Footer Styles */
@@ -114,8 +91,83 @@ form {
   flex-direction: column;
 }
 
-fieldset{
-  width: 40%
+fieldset#input-default-form{
+    width: 40%;
+    background-color: white;
+}
+
+fieldset.sub-course-info {
+    background-color: #f5f5f5;
+    border: 2px solid #cccccc;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+fieldset.sub-course-info legend {
+    color: #333333;
+    font-weight: 600;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+
+fieldset.sub-course-info dt {
+    color: #000000;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+
+fieldset.sub-course-info dd {
+    color: #555555;
+    margin-left: 20px;
+    font-size: 0.95em;
+
+}
+
+
+fieldset.sub-course-info p {
+    color: #888888;
+    font-style: italic;
+    margin: 0;
+}
+
+
+button {
+    background-color: #3f4137;;
+    color: #F5DEB3;
+    border: 1px solid #3f4137;;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #55524d;
+    border-color: #55524d;
+}
+
+
+button:active {
+    background-color: #20221d;
+    border-color: #20221d;
+}
+
+button#add-task-btn {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    /*background-color:  #fdc073;*/
+    /*border: 3px solid #3f4137;*/
+    /*color: #3f4137;*/
+    /*font-weight: bold;*/
+    height: 55px;
+    font-size: 20px
+
 }
 
 /*users tables*/
@@ -202,3 +254,18 @@ fieldset{
     padding-left: 20px;
     margin: 0;
 }
+
+hr {
+    margin-bottom: 20px;
+}
+
+dl.items-list {
+    color: #000000;
+    font-weight: 300;
+}
+
+dt.item-dt {
+    text-decoration: underline;
+    font-size: 18px;
+}
+
