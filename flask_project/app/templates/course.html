@@ -12,9 +12,10 @@
                 <em>{{ course.description }} </em>
             </p> {% endif %}
             <p> <u> Head teacher: {{ course.teacher.name + " " + course.teacher.surname }}</u></p>
+            {{ add_button(url_for("get_rating", course_id=course.id), 'get', "Check ratings", id='students-rating-btn') }}
         </div>
 
-        <div id="lectures" style="margin-bottom: 70px;" >
+        <div style="margin-bottom: 70px;" >
             <fieldset id='lectures' class="sub-course-info">
             <legend style="font-size: 30px;"><strong>Lectures</strong></legend>
             {% if lectures %}
