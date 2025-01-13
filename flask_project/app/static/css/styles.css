@@ -17,6 +17,8 @@ body {
     white-space: normal;
     overflow-wrap: break-word;
     word-break: break-word;
+    color: #3f4137;
+
 }
 
 a {
@@ -91,10 +93,6 @@ form {
   flex-direction: column;
 }
 
-fieldset#input-default-form{
-    width: 40%;
-    background-color: white;
-}
 
 fieldset.sub-course-info {
     background-color: #f5f5f5;
@@ -273,4 +271,124 @@ dt.item-dt {
     width: 200px;
     margin: 0 auto;
 }
+
+
+
+/* General form container */
+#input-default-form {
+    background-color: white; /* Light beige background */
+    padding: 20px;
+    border-radius: 10px;
+    width: 40%;
+    margin: 0 auto;
+    margin-bottom: 30px;
+}
+
+
+/* Label styling */
+label {
+    display: block;
+    font-weight: bold;
+    color: #3f4137; /* Dark grey */
+    margin-bottom: 5px;
+}
+
+h1 {
+     color: #3f4137;
+}
+
+.required {
+        color: red;
+        font-size: 1em;
+        font-weight: bold;
+        margin-left: 5px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #888888;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #fff;
+    color: #333333;
+    box-sizing: border-box;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #fdc073;
+}
+
+
+#submit-btn {
+    width: 50%;
+    margin: 10px auto;
+    display: block;
+}
+
+#submit-btn:hover {
+    background-color: #55524d;
+    border-color: #55524d;
+}
+
+#submit-btn:active {
+    background-color: #20221d;
+    border-color: #20221d;
+}
+
+textarea {
+    resize: vertical;
+}
+
+/* Optional: Error messages */
+.error {
+    color: #fda83d;
+    font-size: 0.9em;
+}
+
+select {
+    margin: 10px auto;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #888888;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #fff;
+    color: #333333;
+    box-sizing: border-box;
+}
+
+select:focus {
+    outline: none;
+    border-color: #fdc073;
+    background-color: #fff;
+}
+option {
+    padding: 10px;
+    font-size: 1em;
+    color: #333333;
+    background-color: #ffffff;
+}
+
+select option:hover {
+    background-color: #fdc073;
+    color: #000;
+}
+
+select[multiple] {
+    height: auto;
+    overflow-y: auto; /* Enable scrolling for many options */
+}
+select option:hover {
+    background-color: #fdc073;
+    color: #000;
+    border: 1px solid #f5a623; /* Optional border to visually separate selected options */
+}
+
+option:focus {
+    color: #3f4137;
+}
+
+
 

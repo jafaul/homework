@@ -64,7 +64,7 @@ def user_create():
     ]
 
     return render_template(
-        "register.html", title="Sign Up", fields=fields, submit_name="Sign Up", menu=get_menu())
+        "input_form.html", title="Sign Up", fields=fields, submit_name="Sign Up", menu=get_menu())
 
 
 @app.route("/users/", methods=["GET"])
@@ -105,14 +105,17 @@ def create_course():
         body = request.form
         print(body)
         with Session(engine) as session:
+            students = body.get("students", [])
+            students_ids = [int(student.split('.', maxsplit=1)[0]) for student in students]
+
+            teacher_id = int(body["teacher"].split(".", maxsplit=1)[0])
+
             course = Course(
-                teacher_id=int(body["teacher_id"]),
+                teacher_id=int(teacher_id),
                 title=body["title"],
                 description=body["description"],
             )
-            students_ids = [
-                int(student_id.strip()) for student_id in body.get("students_ids", []).split(",")
-            ]
+
             if students_ids:
                 students = session.query(User).filter(User.id.in_(students_ids)).all()
                 course.students = students
@@ -123,15 +126,31 @@ def create_course():
 
         return redirect(f"/courses/{course_id}", 302)
 
+    with Session(engine) as session:
+        users = session.query(User).all()
+        users_for_web = [
+            str(user.id) + "." + str(user.name) + " " + str(user.surname) for user in users
+        ]
 
     fields = [
         {"title": "Title of course", "type": "text", "name": "title", "is_required": True},
-        {"title": "Teacher's ID", "type": "text", "name": "teacher_id", "is_required": True},
-        {"title": "Students' IDs", "type": "text", "name": "students_ids", "is_required": True, "placeholder": "1,2,3"},
+        {
+            "title": "Teacher", "type": "list", "name": "teacher", "is_required": True,
+            "options": users_for_web, "multiple": False
+        },
+        {
+            "title": "Students", "type": "list", "name": "students", "is_required": True,
+            "placeholder": "Select students", "options": users_for_web, "multiple": True
+        },
         {"title": "Description", "type": "text", "name": "description", "is_required": False},
     ]
     return render_template(
-        "create_course.html", title="Create Course", fields=fields, submit_name="Create", menu=get_menu())
+        "create_course.html",
+        title="Create Course",
+        fields=fields,
+        submit_name="Create",
+        menu=get_menu()
+    )
 
 
 @app.route("/courses/<int:course_id>/", methods=["GET"])
@@ -195,20 +214,25 @@ def add_lectures_to_course(course_id):
             lecture = Lecture(
                 course_id=course_id,
                 title=body["title"],
-                description=body["description"],
+                description=body.get("description", ""),
             )
             session.add(lecture)
             session.commit()
 
         return redirect(f"/courses/{course_id}/", code=302)
-    return """
-        <form method="POST">
-            Title:        <input type="text" name="title" /> <br>
-            Description:  <input type="text" name="description" /> <br>
 
-            <input type="submit" value="CREATE" /> <br>
-        </form>
-     """
+
+    fields = [
+        {"title": "Lecture Title", "type": "text", "name": "title", "is_required": True},
+        {"title": "Description", "type": "text", "name": "description", "is_required": False}
+    ]
+    return render_template(
+        "input_form.html",
+        title="Add Lecture",
+        fields=fields,
+        submit_name="Add",
+        menu=get_menu()
+    )
 
 
 @app.route("/courses/<int:course_id>/tasks/", methods=["GET", "POST"])
@@ -217,6 +241,7 @@ def task_page(course_id):
         body = request.form
         with Session(engine) as session:
             task = Task(
+                title=body["title"],
                 course_id=course_id,
                 description=body["description"],
                 max_mark=int(body["max_mark"]),
@@ -226,16 +251,25 @@ def task_page(course_id):
             session.commit()
 
         return redirect(f"/courses/{course_id}", code=302)
-
     default_date = (datetime.now().today() + timedelta(days=7)).strftime("%Y-%m-%d")
-    return f"""
-        <form method="POST">
-            Description:  <input type="text" name="description" /> <br>
-            Max mark:  <input type="number" name="max_mark" max="200" value="5" /> <br>
-            Deadline:  <input type="date" name="deadline" value="{default_date}" /> <br>
-            <input type="submit" value="UPDATE" /> <br>
-        </form>
-     """
+
+    fields = [
+        {"title": "Title", "type": "text", "name": "title", "is_required": True},
+        {"title": "Description", "type": "text", "name": "description", "is_required": False},
+        {
+            "title": "Max mark", "type": "number", "name": "max_mark", "is_required": True,
+            "max": 200, "min": 5, "default_value": 5
+        },
+        {"title": "Deadline", "type": "date", "name": "deadline", "is_required": True, "default_value": default_date},
+
+    ]
+    return render_template(
+        "input_form.html",
+        title="Add Task",
+        fields=fields,
+        submit_name="Add",
+        menu=get_menu()
+    )
 
 
 @app.route(
@@ -254,6 +288,28 @@ def task_answer(course_id: int, task_id: int):
             session.commit()
 
         return redirect(f"/courses/{course_id}/", code=302)
+
+    with Session(engine) as session:
+        users = session.query(User).options(joinedload(User.courses_as_student)).filter(Course.id == course_id).all()
+        users_for_web = [
+            str(user.id) + "." + str(user.name) + " " + str(user.surname) for user in users
+        ]
+        print(users_for_web)
+
+    fields = [
+        {"title": "Student's answer", "type": "text", "name": "description", "is_required": True},
+        {
+            "title": "Student name", "type": "list", "name": "student", "is_required": True,
+            "options": users_for_web, "multiple": False
+        },
+    ]
+    return render_template(
+        "input_form.html",
+        title="Send a homework",
+        fields=fields,
+        submit_name="Send",
+        menu=get_menu()
+    )
 
     return """
         <form method="POST">
