@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form practice</title>
+</head>
+<body>
+<h1>Payment Form</h1>
+<fieldset>
+    <legend>Payment form</legend>
+
+    <label>Card number
+        <input type="text" name="card-number" maxlength="16" minlength="16" required />
+    </label><br>
+
+    <label>Expiration month
+        <select name="expiration-month" required>
+            <option></option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+        </select>
+    </label>
+
+    <label>Year
+    <select name="expiration-year" required>
+        <option></option>
+        <option value="2025">2025</option>
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+        <option value="2028">2028</option>
+        <option value="2029">2029</option>
+        <option value="2030">2030</option>
+        <option value="2031">2031</option>
+        <option value="2032">2032</option>
+        <option value="2033">2033</option>
+        <option value="2034">2034</option>
+        <option value="2035">2035</option>
+        <option value="2036">2036</option>
+        <option value="2037">2037</option>
+        <option value="2038">2038</option>
+        <option value="2039">2039</option>
+        <option value="2040">2040</option>
+        <option value="2041">2041</option>
+        <option value="2042">2042</option>
+        <option value="2043">2043</option>
+        <option value="2044">2044</option>
+        <option value="2045">2045</option>
+    </select>
+    </label> <br>
+
+    <label>Cardholder name
+        <input name="cardholder_name" type="text" required>
+    </label><br>
+
+    <label>CVV
+        <input type="password" name="CVV" maxlength="4" minlength="3" required>
+    </label>
+
+</fieldset>
+
+<fieldset>
+    <legend>Shipping</legend>
+    <label for="shipping">Nova Post</label><input id="shipping" type="radio" name="shipping" value="Nova Post"> <br>
+    <label>Latvijas Pasts<input type="radio" name="shipping" value="Latvijas Pasts"></label> <br>
+    <label>Ukr Post<input type="radio" name="shipping" value="Urk Post"></label> <br>
+</fieldset>
+
+<fieldset>
+    <legend>User info</legend>
+    <label for="payment-email">Send receipt to the Email:</label>
+    <input id="payment-email" type="email" name="email" />
+    <br>
+
+    <label for="payment-comment">Comment:</label><br>
+    <textarea id="payment-comment" name="paymnet_comment" rows="4" cols="30"></textarea>>
+    <br>
+</fieldset>
+
+<label>
+    <input type="checkbox" name="do-not-call">
+           Do not call me back
+</label>
+<br>
+<a href="http://test.com/terms-of-service">Terms of service</a>
+
+<br>
+<input type="submit" value="Pay">
+
+</body>
+
+</html>
