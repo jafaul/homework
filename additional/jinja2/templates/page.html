@@ -1,8 +1,0 @@
-{# {% import 'dialogs.html' as dlg %} #}
-{% from 'dialogs.html' import dialog_1 as dlg %}
-
-{% include 'header.html' %}
-<p> Page
-    {# {{ dlg.dialog_1('Attention', 'This is a test dialog') }} #}
-    {{ dlg("Attention", "This is a test dialog") }}
-{% include 'footer.html' %}
