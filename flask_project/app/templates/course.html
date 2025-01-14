@@ -70,9 +70,8 @@
                                 <th>Student</th>
                                 <th>Student answer</th>
                                 <th>Date</th>
-                                <th>Mark</th>
                                 <th>Teacher</th>
-                                <th></th>
+                                <th>Mark</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -81,13 +80,15 @@
                                 <td>{{ answer.student_name}}</td>
                                 <td>{{ answer.description }}</td>
                                 <td>{{ answer.submission_date }}</td>
+                                {% if answer.mark and answer.teacher %}
+                                <td>{{ answer.teacher.name + " " + answer.teacher.surname}}</td>
                                 <td>{{ answer.mark }}</td>
-                                <td>{{ answer.teacher_name }}</td>
-                                <td>
-                                {% if answer.mark == "Pending to review" %}
+                                {% else %}
+                                <td colspan="2">
                                     {{ add_button(url_for("set_mark", course_id=course.id, task_id=task.id, answer_id=answer.id), "get", "Assign a mark") }}
-                                {% endif %}
                                 </td>
+                                {% endif %}
+
                                 </tr>
                             {% endfor %}
                             </tbody>

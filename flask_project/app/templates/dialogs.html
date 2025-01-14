@@ -39,7 +39,11 @@
     <select class="form-select" name="{{ field.name }}"
             {% if field.multiple %} multiple {% endif %}
             {% if field.is_required %} required {% endif %}>
+        {% if not field.default %}
         <option disabled selected>Select {{ field.name }}</option>
+        {% else %}
+        <option selected>{{ field.default }}</option>
+        {% endif %}
         {% for field_option in field.options %}
             {% set value_name = field_option.split(".", 1)[0] %}
             <option value="{{ value_name }}" id="options">{{ field_option }}</option>

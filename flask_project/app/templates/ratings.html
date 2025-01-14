@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block content -%}
+{{ super() }}
+
+<div class="container first-container col-sm-12 pull-left">
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Position</th>
+        <th>Avg mark</th>
+        <th>Student</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for rating in ratings %}
+        <tr class="row">
+            <td>
+                {{ loop.index }}
+            </td>
+            <td>
+                {{ rating.avg_mark }}
+            </td>
+            <td>
+                {{ rating.name + " " + rating.surname}}
+            </td>
+
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+{% endblock content %}
+
+{% block footer %} {{ super() }} {%  endblock footer %}
