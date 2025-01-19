@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{%  from 'dialogs.html' import add_link_img %}
+{% block title %} {{ title }} {% endblock %}
+
+{% block content -%}
+{{ super() }}
+
+<div class="container first-container col-sm-12 pull-left">
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th id="id-column">ID</th>
+        <th id="title-column">Title</th>
+        <th id="teacher-column">Teacher</th>
+        <th id="desc-column">Description</th>
+        <th id="stud-column">Students</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for course in courses %}
+        <tr class="row">
+            <td id="id-column">
+                <a href="{{ url_for('get_course_info', course_id=course.id) }}">{{ course.id }}
+                    {{ add_link_img() }}
+                </a>
+            </td>
+            <td id="title-column">
+                {{ course.title }}
+            </td>
+            <td id="teacher-column">
+                {{ course.teacher.name + " " + course.teacher.surname}}
+            </td>
+
+            <td id="desc-column">{{ course.description }}</td>
+            <td id="stud-column">
+            {% if course.students %}
+                <ul id="students-list">
+                    {% for student in course.students %}
+                        <li>{{ student.name + " " + student.surname }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock content %}
+
+{% block footer %} {{ super() }} {%  endblock footer %}
+

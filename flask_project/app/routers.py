@@ -1,10 +1,11 @@
 import random
 import string
 from datetime import datetime, timedelta
+from functools import lru_cache
 from time import perf_counter
 
-from flask import Flask, request, Response, jsonify, redirect, abort
-from sqlalchemy import func
+from flask import Flask, request, Response, jsonify, redirect, abort, render_template, url_for
+from sqlalchemy import func, desc
 from sqlalchemy.orm import Session, joinedload, selectinload, noload
 
 from .database import engine
@@ -12,6 +13,21 @@ from .models import *
 from .tools import serialize_list
 
 app = Flask(__name__)
+
+@lru_cache
+def get_menu():
+    menu = [
+        {"url": url_for("index", _external=True), "name": "Home"},
+        {"url": url_for("get_courses", _external=True), "name": "Courses"},
+        {"url": url_for("create_course", _external=True), "name": "Create Course"},
+        {"url": url_for("get_users", _external=True), "name": "Users"},
+        {"url": url_for("user_create", _external=True), "name": "Sign up"},
+    ]
+    return menu
+
+@app.route("/", methods=["GET"])
+def index():
+    return render_template("index.html", menu=get_menu(), title="Welcome to our school!")
 
 
 @app.route("/whoami/", methods=["GET"])
@@ -39,16 +55,16 @@ def user_create():
 
         return redirect("/users/", code=302)
 
-    return """
-        <form method="POST">
-            Email:    <input type="email" name="email" /> <br>
-            Password: <input type="password" name="password" /> <br>
-            Name:     <input type="text" name="name" /> <br>
-            Surname:  <input type="text" name="surname" /> <br>
+    fields = [
+        {"title": "Email", "type": "email", "name": "email", "is_required": True},
+        {"title": "Password", "type": "password", "name": "password", "is_required": True},
+        {"title": "Name", "type": "name", "name": "name", "is_required": True},
+        {"title": "Surname", "type": "surname", "name": "surname", "is_required": True},
+        {"title": "Phone number", "type": "phone_number", "name": "phone_number", "is_required": False},
+    ]
 
-            <input type="submit" value="REGISTER" /> <br>
-        </form>
-        """
+    return render_template(
+        "input_form.html", title="Sign Up", fields=fields, submit_name="Sign Up", menu=get_menu())
 
 
 @app.route("/users/", methods=["GET"])
@@ -65,17 +81,11 @@ def get_users():
                 selectinload(User.courses_as_teacher),  # select in load for one to many
                 noload(User.answers),  # return answers: []
             )
-            .all()
+            .order_by(desc(User.id)).all()
         )
 
         print(str(perf_counter() - start))
-
-    return (
-        jsonify(
-            serialize_list(users, include_relationships=True, exclude=("answers",))
-        ),
-        200,
-    )
+    return render_template("users.html", users=users, menu=get_menu(), title="Users")
 
 
 @app.route("/courses/", methods=["GET"])
@@ -84,25 +94,27 @@ def get_courses():
         courses = (
             session.query(Course)
             .options(joinedload(Course.teacher), joinedload(Course.students))
-            .all()
+            .order_by(desc(Course.id)).all()
         )
-
-    return jsonify(serialize_list(courses, include_relationships=True)), 200
+    return render_template("courses.html", courses=courses, menu=get_menu(), title="Courses")
 
 
 @app.route("/courses/create/", methods=["GET", "POST"])
 def create_course():
     if request.method == "POST":
         body = request.form
+        print(body)
         with Session(engine) as session:
+            students_ids = [int(student) for student in body.getlist("students")]
+
+            teacher_id = int(body["teacher"].split(".", maxsplit=1)[0])
+
             course = Course(
-                teacher_id=int(body["teacher_id"]),
+                teacher_id=int(teacher_id),
                 title=body["title"],
                 description=body["description"],
             )
-            students_ids = [
-                int(student_id.strip()) for student_id in body.get("students_ids", []).split(",")
-            ]
+
             if students_ids:
                 students = session.query(User).filter(User.id.in_(students_ids)).all()
                 course.students = students
@@ -113,16 +125,31 @@ def create_course():
 
         return redirect(f"/courses/{course_id}", 302)
 
-    return """
-        <form method="POST">
-            Title:        <input type="text" name="title" /> <br>
-            Teacher ID:   <input type="number" name="teacher_id" /> <br>
-            Students IDs: <input type="text" name="students_ids" placeholder="1,2,3" /> <br>
-            Description:   <input type="text" name="description" value="" /> <br>
+    with Session(engine) as session:
+        users = session.query(User).all()
+        users_for_web = [
+            str(user.id) + "." + str(user.name) + " " + str(user.surname) for user in users
+        ]
 
-            <input type="submit" value="CREATE" /> <br>
-        </form>
-     """
+    fields = [
+        {"title": "Title of course", "type": "text", "name": "title", "is_required": True},
+        {
+            "title": "Teacher", "type": "list", "name": "teacher", "is_required": True,
+            "options": users_for_web, "multiple": False
+        },
+        {
+            "title": "Students", "type": "list", "name": "students", "is_required": True,
+            "placeholder": "Select students", "options": users_for_web, "multiple": True
+        },
+        {"title": "Description", "type": "text", "name": "description", "is_required": False},
+    ]
+    return render_template(
+        "input_form.html",
+        title="Create Course",
+        fields=fields,
+        submit_name="Create",
+        menu=get_menu()
+    )
 
 
 @app.route("/courses/<int:course_id>/", methods=["GET"])
@@ -130,26 +157,50 @@ def get_course_info(course_id):
     with Session(engine) as session:
         course = (
             session.query(Course)
+            .options(
+                joinedload(Course.lectures),
+                joinedload(Course.tasks)
+                .joinedload(Task.answers)
+                .joinedload(Answer.mark)
+                .joinedload(Mark.teacher),
+                joinedload(Course.teacher)
+        )
             .filter(Course.id == course_id)
             .one()
-            .as_dict(include_relationships=True)
         )
-        lectures = (
-            session.query(Lecture).filter(Lecture.course_id == course["id"]).all()
-        )
-        course["lectures"] = serialize_list(lectures)
-        raw_tasks = session.query(Task).filter(Task.course_id == course["id"]).all()
-        tasks = serialize_list(raw_tasks, include_relationships=True)
-        for task in tasks:
-            for answer in task["answers"]:
-                mark = (
-                    session.query(Mark).filter(Mark.answer_id == answer["id"]).first()
-                )
-                if mark:
-                    answer["mark"] = mark.as_dict()
-        course["tasks"] = tasks
 
-    return jsonify(course), 200
+        serialized_lectures = [
+            {
+                "title": lecture.title,
+                "description": lecture.description,
+            }
+            for lecture in course.lectures
+        ]
+
+        serialized_tasks = []
+        for task in course.tasks:
+            task_dict = {
+                "id": task.id,
+                "title": task.title,
+                "max_mark": task.max_mark,
+                "deadline": task.deadline,
+                "description": task.description,
+                "answers": [
+                    {
+                        "id": answer.id,
+                        "student_name": f"{answer.student.name} {answer.student.surname}",
+                        "description": answer.description,
+                        "submission_date": answer.submission_date,
+                        "mark": answer.mark.mark_value if answer.mark else "Pending to review",
+                        "teacher": answer.mark.teacher if answer.mark else None
+                    }
+                    for answer in task.answers
+                ],
+            }
+            serialized_tasks.append(task_dict)
+    return render_template(
+        "course.html", menu=get_menu(), course=course,
+        title=course.title, tasks=serialized_tasks, lectures=serialized_lectures)
 
 
 @app.route("/courses/<int:course_id>/lectures/", methods=["GET", "POST"])
@@ -160,20 +211,25 @@ def add_lectures_to_course(course_id):
             lecture = Lecture(
                 course_id=course_id,
                 title=body["title"],
-                description=body["description"],
+                description=body.get("description", ""),
             )
             session.add(lecture)
             session.commit()
 
         return redirect(f"/courses/{course_id}/", code=302)
-    return """
-        <form method="POST">
-            Title:        <input type="text" name="title" /> <br>
-            Description:  <input type="text" name="description" /> <br>
 
-            <input type="submit" value="CREATE" /> <br>
-        </form>
-     """
+
+    fields = [
+        {"title": "Lecture Title", "type": "text", "name": "title", "is_required": True},
+        {"title": "Description", "type": "text", "name": "description", "is_required": False}
+    ]
+    return render_template(
+        "input_form.html",
+        title="Add Lecture",
+        fields=fields,
+        submit_name="Add",
+        menu=get_menu()
+    )
 
 
 @app.route("/courses/<int:course_id>/tasks/", methods=["GET", "POST"])
@@ -182,6 +238,7 @@ def task_page(course_id):
         body = request.form
         with Session(engine) as session:
             task = Task(
+                title=body["title"],
                 course_id=course_id,
                 description=body["description"],
                 max_mark=int(body["max_mark"]),
@@ -191,16 +248,25 @@ def task_page(course_id):
             session.commit()
 
         return redirect(f"/courses/{course_id}", code=302)
-
     default_date = (datetime.now().today() + timedelta(days=7)).strftime("%Y-%m-%d")
-    return f"""
-        <form method="POST">
-            Description:  <input type="text" name="description" /> <br>
-            Max mark:  <input type="number" name="max_mark" max="200" value="5" /> <br>
-            Deadline:  <input type="date" name="deadline" value="{default_date}" /> <br>
-            <input type="submit" value="UPDATE" /> <br>
-        </form>
-     """
+
+    fields = [
+        {"title": "Title", "type": "text", "name": "title", "is_required": True},
+        {"title": "Description", "type": "text", "name": "description", "is_required": False},
+        {
+            "title": "Max mark", "type": "number", "name": "max_mark", "is_required": True,
+            "max": 200, "min": 5, "default_value": 5
+        },
+        {"title": "Deadline", "type": "date", "name": "deadline", "is_required": True, "default_value": default_date},
+
+    ]
+    return render_template(
+        "input_form.html",
+        title="Add Task",
+        fields=fields,
+        submit_name="Add",
+        menu=get_menu()
+    )
 
 
 @app.route(
@@ -209,6 +275,7 @@ def task_page(course_id):
 def task_answer(course_id: int, task_id: int):
     if request.method == "POST":
         body = request.form
+        print("BODY: ", body)
         with Session(engine) as session:
             answer = Answer(
                 task_id=task_id,
@@ -220,14 +287,26 @@ def task_answer(course_id: int, task_id: int):
 
         return redirect(f"/courses/{course_id}/", code=302)
 
-    return """
-        <form method="POST">
-            Description:  <input type="text" name="description" /> <br>
-            Student ID:   <input type="number" name="student_id" /> <br>
+    with Session(engine) as session:
+        users = session.query(User).join(User.courses_as_student).filter(Course.id == course_id).all()
+        users_for_web = [
+            str(user.id) + "." + str(user.name) + " " + str(user.surname) for user in users
+        ]
 
-            <input type="submit" value="ANSWER" /> <br>
-        </form>
-     """
+    fields = [
+        {"title": "Student's answer", "type": "text", "name": "description", "is_required": True},
+        {
+            "title": "Student name", "type": "list", "name": "student_id", "is_required": True,
+            "options": users_for_web, "multiple": False
+        },
+    ]
+    return render_template(
+        "input_form.html",
+        title="Send a homework",
+        fields=fields,
+        submit_name="Send",
+        menu=get_menu()
+    )
 
 
 @app.route(
@@ -237,19 +316,22 @@ def task_answer(course_id: int, task_id: int):
 def set_mark(course_id: int, task_id: int, answer_id: int):
     if request.method == "POST":
         body = request.form
+        print(body)
+        teacher_id = int(body["teacher"].split(".", maxsplit=1)[0])
 
         with Session(engine) as session:
+
             start = perf_counter()
             mark = session.query(Mark).filter(Mark.answer_id == answer_id).first()
             if mark:
-                mark.teacher_id = int(body["teacher_id"])
+                mark.teacher_id = teacher_id
                 mark.mark_value = int(body["mark_value"])
             else:
                 mark = Mark(
                     answer_id=answer_id,
                     mark_value=int(body["mark_value"]),
-                    date=datetime.strptime(body["date"], "%Y-%m-%d").date(),
-                    teacher_id=int(body["teacher_id"]),
+                    date=datetime.now().today().date(),
+                    teacher_id=teacher_id,
                 )
 
             session.add(mark)
@@ -258,19 +340,30 @@ def set_mark(course_id: int, task_id: int, answer_id: int):
         return redirect(f"/courses/{course_id}", code=302)
 
     else:
-        default_date = datetime.now().today().strftime("%Y-%m-%d")
         with Session(engine) as session:
             max_mark = session.query(Task).filter(Task.id == task_id).first().max_mark
+            teachers = session.query(User).join(User.courses_as_teacher).filter(User.courses_as_student.any()).all()
+            teachers_for_web = [
+                str(teacher.id) + "." + str(teacher.name) + " " + str(teacher.surname) for teacher in teachers
+            ]
 
-        return f"""
-            <form method="POST">
-                Datetime:    <input type="date" name="date" value="{default_date}" readonly /> <br>
-                Mark:        <input type="number" name="mark_value" min="0" max="{max_mark}"/> <br>
-                Teacher ID:  <input type="number" name="teacher_id" /> <br>
+            teacher = session.query(User).join(User.courses_as_teacher).filter(Course.id == course_id).one()
+            teacher_for_web = str(teacher.id) + "." + teacher.name + " " + teacher.surname
 
-                <input type="submit" value="SEND" /> <br>
-            </form>
-         """
+        fields = [
+            {"title": "Mark", "type": "number", "name": "mark_value", "is_required": True, "max": max_mark, "min": 0},
+            {
+                "title": "Teacher", "type": "list", "name": "teacher", "is_required": True,
+                "options": teachers_for_web, "multiple": False, "default": teacher_for_web
+            }
+        ]
+        return render_template(
+            "input_form.html",
+            title="Assign a mark",
+            fields=fields,
+            submit_name="Assign",
+            menu=get_menu()
+        )
 
 
 @app.route("/courses/<int:course_id>/rating/", methods=["GET", "POST"])
@@ -279,19 +372,20 @@ def get_rating(course_id):
         return abort(404, description="Not Implemented")
 
     with Session(engine) as session:
-        avg_mark = func.round(func.avg(Mark.mark_value).label("avg_mark"), 2)
+        avg_mark = func.coalesce(func.round(func.avg(Mark.mark_value), 2), 0).label('avg_mark')
 
         raw_results = (
             session.query(User.id, User.name, User.surname, avg_mark)
             .join(User.courses_as_student)
-            .join(Answer)
-            .join(Mark)
             .filter(Course.id == course_id)
+            .join(Course.tasks)
+            .outerjoin(Task.answers).filter((Answer.student_id == User.id))
+            .outerjoin(Answer.mark)
             .group_by(User.id)
             .order_by(avg_mark.desc())
             .all()
         )
-
+        print("RAW RESULT", raw_results)
         results = [
             {
                 "id": raw_result[0],
@@ -302,7 +396,12 @@ def get_rating(course_id):
             for raw_result in raw_results
         ]
 
-        return jsonify(results), 200
+
+    with Session(engine) as session:
+        course_title = session.query(Course.title).filter(Course.id == course_id).first()[0]
+    return render_template(
+        "ratings.html", menu=get_menu(), ratings=results,
+        title=f"Student ratings for course '{course_title}'")
 
 
 @app.route("/source_code/")

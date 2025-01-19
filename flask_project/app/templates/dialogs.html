@@ -1,0 +1,79 @@
+
+{% macro add_button(url, method, text, id="") %}
+    {% if url %}
+     <form action="{{ url }}" method="{{ method }}">
+     {% else %}
+     <form>
+     {% endif %}
+        <button type="submit" class="btn btn-primary" id="{{ id }}">{{ text }}</button>
+    </form>
+{% endmacro %}
+
+
+{% macro input_form(fields, submit_name='Submit') -%}
+<fieldset id="input-default-form">
+    <form method="post">
+        {% for field in fields %}
+            <label for="{{ field.name }}">
+                {{ field.title }}
+                {% if field.is_required %}
+                    <span class="required">*</span>
+                {% endif %}
+            </label>
+
+            {% if field.name == "description" %}
+                {{ render_textarea(field) }}
+            {% elif field.type == "list" %}
+                {{ render_list(field) }}
+            {% else %}
+                {{ render_field(field) }}
+            {% endif %}
+        {% endfor %}
+        {{ add_button('', 'get', submit_name, id='submit-btn') }}
+    </form>
+</fieldset>
+
+{%- endmacro %}
+
+{% macro render_list(field) %}
+    <select class="form-select" name="{{ field.name }}"
+            {% if field.multiple %} multiple {% endif %}
+            {% if field.is_required %} required {% endif %}>
+        {% if not field.default %}
+        <option disabled selected>Select {{ field.name }}</option>
+        {% else %}
+        <option selected>{{ field.default }}</option>
+        {% endif %}
+        {% for field_option in field.options %}
+            {% set value_name = field_option.split(".", 1)[0] %}
+            <option value="{{ value_name }}" id="options">{{ field_option }}</option>
+        {% endfor %}
+
+    </select>
+
+{% endmacro %}
+
+
+{% macro render_field(field) %}
+    <input class="form-field"
+           id="{{ field.name }}"
+           type="{{ field.type }}"
+           name="{{ field.name }}"
+           {% if field.default_value %} value="{{ field.default_value }}" {% endif %}
+           {% if field.max %} max="{{ field.max }}" {% endif %}
+           {% if field.min %} min="{{ field.min }} {% endif %}"
+           {% if field.is_required %}required{% endif %}
+           {% if field.placeholder %}placeholder="{{ field.placeholder }}"{% endif %} />
+    <br>
+{% endmacro %}
+
+
+{% macro render_textarea(field) %}
+    <textarea id="desc" name="{{ field.name }}" rows="4" cols="30" {% if field.is_required %}required{% endif %}></textarea>
+{% endmacro %}
+
+
+{% macro add_link_img() %}
+        <img src="../static/url.jpg" alt="" style="width:10px; background: none; margin-top: -20px; ">
+{% endmacro %}
+

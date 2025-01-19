@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% from 'dialogs.html' import add_button %}
+
+{% block title %} {{ title }} {% endblock title %}
+
+{% block content -%}
+{{ super() }}
+
+<div class="container">
+        <div class="course-header" style="text-align: center; margin-bottom: 50px; margin-top: -30px">
+            {% if course.description %}<p>
+                <em>{{ course.description }} </em>
+            </p> {% endif %}
+            <p style="font-size: 18px; margin-bottom: 30px"> <u> Head teacher: {{ course.teacher.name + " " + course.teacher.surname }}</u></p>
+            {{ add_button(url_for("get_rating", course_id=course.id), 'get', "Check ratings", id='students-rating-btn') }}
+        </div>
+
+        <div style="margin-bottom: 40px;" >
+            <fieldset id='lectures' class="sub-course-info">
+            <legend style="font-size: 30px;"><strong>Lectures</strong></legend>
+            {% if lectures %}
+                <dl class="items-list">
+                {% for lecture in lectures %}
+                <dt class='item-dt' style="counter-increment: dt-counter; color: #3f4137; font-weight: 300"><strong>{{ lecture.title }}</strong></dt>
+                    {% if lecture.description %}
+                        <dd class="sub-item-list"><em>{{ lecture.description }}</em></dd>
+                    {% endif %}
+                    <hr>
+                </dl>
+
+                {% endfor %}
+            {% else %}
+                <p style="margin: 20px">No lectures available for this course.</p>
+            {% endif %}
+                {{ add_button(
+                    url_for('add_lectures_to_course',  course_id=course.id),
+                    method='get',
+                    text='Add a new lecture to this course', id="add-task-btn"
+                )
+                }}
+
+            </fieldset>
+        </div>
+        <div>
+        <fieldset id="tasks" class="sub-course-info">
+            <legend style="font-size: 30px;"><strong>Tasks</strong></legend>
+            {% if course.tasks %}
+                <dl id="task-list"  class="items-list">
+                    {% for task in tasks %}
+                        <dt class='item-dt' style="font-size: 20px; text-decoration: underline;
+                         counter-increment: dt-counter; color: #3f4137; font-weight: 300">
+                            <strong>
+                                {% if task.title %}
+                                {{ task.title }}
+                                {% else %}
+                                 Task {{ task.id }}
+                                {% endif %}
+                            </strong></dt>
+                        <dd class="sub-item-list"><strong>Max mark: </strong>{{ task.max_mark }}</dd>
+                        <dd class="sub-item-list"><strong>Deadline: </strong>{{ task.deadline }}</dd>
+                        <hr>
+                        {% if task.description %}
+                        <dd class="sub-item-list"><strong>Description:</strong> </dd>
+                        <dd  class="sub-item-list" style="margin-top: 10px;">{{ task.description }}</dd>
+                        {% endif %}
+                        {% if task.answers %}
+                            <table  class="table table-condensed">
+                            <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Student answer</th>
+                                <th>Date</th>
+                                <th>Teacher</th>
+                                <th>Mark</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for answer in task.answers %}
+                                <tr>
+                                <td>{{ answer.student_name}}</td>
+                                <td>{{ answer.description }}</td>
+                                <td>{{ answer.submission_date }}</td>
+                                {% if answer.mark and answer.teacher %}
+                                <td>{{ answer.teacher.name + " " + answer.teacher.surname}}</td>
+                                <td>{{ answer.mark }}</td>
+                                {% else %}
+                                <td colspan="2">
+                                    {{ add_button(url_for("set_mark", course_id=course.id, task_id=task.id, answer_id=answer.id), "get", "Assign a mark") }}
+                                </td>
+                                {% endif %}
+
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                            </table>
+                        {% endif %}
+
+                        {{ add_button(url_for("task_answer", course_id=course.id, task_id=task.id), 'get', "Create answer") }}
+                    {% endfor %}
+                        <hr>
+                </dl>
+            {% else %}
+                <p style="margin: 20px" >No lectures available for this course.</p>
+            {% endif %}
+             {{ add_button(url_for("task_page", course_id=course.id), 'get', "Add a new task to this course", id="add-task-btn") }}
+        </fieldset>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block footer %} {{ super() }}
+{%  endblock footer %}

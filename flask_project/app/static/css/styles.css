@@ -1,0 +1,395 @@
+html {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: flex; /* Flexbox for the layout */
+    flex-direction: column; /* Stack elements vertically */
+    resize: vertical;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: flex;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    color: #3f4137;
+
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+  color: #CC0000;
+    text-decoration: underline;
+}
+
+
+ul.mainmenu {
+    list-style: none;
+    background: #3f4137;
+    margin: 0;
+    padding: 8px 0;
+    color: #fdc073;
+    font-size: 20px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+}
+
+ul.mainmenu li {
+    float: left;
+    margin: 18px 40px
+}
+
+ul.mainmenu li a {
+    color: #fdc073
+}
+
+ul.mainmenu li a:hover {
+    color: #fda83d
+}
+
+footer {
+    background: #3f4137;
+    color: #fdc073;
+    text-align: center;
+    padding: 20px 0;
+    position: relative;
+    width: 100%;
+    bottom: 0;
+}
+
+footer p {
+    margin: 0;
+    font-size: 16px;
+}
+
+footer a {
+    color: #fdc073;
+}
+
+footer a:hover {
+    color: #fda83d;
+}
+
+.welcome-picture {
+    max-width: 100%;
+    max-height: 50vh;
+    object-fit: cover;
+    margin: auto;
+}
+
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+
+fieldset.sub-course-info {
+    background-color: #f5f5f5;
+    border: 2px solid #cccccc;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+fieldset.sub-course-info legend {
+    color: #333333;
+    font-weight: 600;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+
+fieldset.sub-course-info dt {
+    color: #000000;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+
+fieldset.sub-course-info dd {
+    color: #555555;
+    margin-left: 20px;
+    font-size: 0.95em;
+
+}
+
+
+fieldset.sub-course-info p {
+    color: #888888;
+    font-style: italic;
+    margin: 0;
+}
+
+
+button {
+    background-color: #3f4137;;
+    color: #F5DEB3;
+    border: 1px solid #3f4137;;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #55524d;
+    border-color: #55524d;
+}
+
+
+button:active {
+    background-color: #20221d;
+    border-color: #20221d;
+}
+
+button#add-task-btn {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    height: 55px;
+    font-size: 20px
+
+}
+
+
+.container {
+    margin: 20px auto;
+    padding: 15px;
+    max-width: 100%;
+}
+
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    table-layout: fixed;
+}
+
+
+.table th,
+.table td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #3f4137;
+    color: #fdc073;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.courses ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin: 0;
+}
+
+.courses li a {
+    text-decoration: none;
+    color: #3f4137;
+}
+
+
+.courses li a:hover {
+    color: #CC0000;
+    text-decoration: underline;
+}
+
+
+.courses li a:hover {
+    text-decoration: underline;
+}
+
+
+/*courses*/
+#students-list {
+    list-style-type: none;
+    padding-left: 20px;
+    margin: 0;
+}
+
+hr {
+    margin-bottom: 20px;
+}
+
+dd {
+    margin: 20px auto;
+    resize: vertical;
+
+}
+
+dl.items-list {
+    color: #000000;
+    font-weight: 300;
+}
+
+dt.item-dt {
+    text-decoration: underline;
+    font-size: 18px;
+}
+
+#students-rating-btn{
+    width: 200px;
+    margin: 0 auto;
+}
+
+
+#input-default-form {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 40%;
+    margin: 0 auto;
+    margin-bottom: 30px;
+}
+
+
+label {
+    display: block;
+    font-weight: bold;
+    color: #3f4137;
+    margin-bottom: 5px;
+}
+
+h1 {
+     color: #3f4137;
+}
+
+.required {
+        color: red;
+        font-size: 1em;
+        font-weight: bold;
+        margin-left: 5px;
+}
+
+input, textarea {
+    font-family: Arial, Helvetica, sans-serif;
+
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    background-color: #fff;
+    color: #333333;
+    box-sizing: border-box;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #888888;
+    border-radius: 5px;
+    margin: 20px auto;
+}
+
+
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #fdc073;
+}
+
+
+#submit-btn {
+    width: 50%;
+    margin: 10px auto;
+    display: block;
+}
+
+#submit-btn:hover {
+    background-color: #55524d;
+    border-color: #55524d;
+}
+
+#submit-btn:active {
+    background-color: #20221d;
+    border-color: #20221d;
+}
+
+textarea {
+    resize: vertical;
+}
+
+
+select {
+    margin: 10px auto;
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    background-color: #fff;
+    color: #333333;
+    appearance: none;
+    box-sizing: border-box;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #888888;
+    border-radius: 5px;
+
+}
+
+
+select[multiple]:focus option:checked {
+    background-color: #fdc073;
+    color: #000;
+}
+
+select:focus {
+    outline: none;
+    border-color: #fdc073;
+    background-color: #fff;
+}
+
+option {
+    padding: 10px;
+    font-size: 1em;
+    color: #333333;
+    background-color: #ffffff;
+    border-radius: 5px;
+}
+
+select option:hover {
+    background-color: #fdc073;
+    color: #000;
+}
+
+select[multiple] {
+    height: auto;
+    overflow-y: auto;
+}
+select option:hover {
+    background-color: #fdc073;
+    color: #000;
+    border: 1px solid #f5a623;
+}
+
+option:focus {
+    color: #3f4137;
+}
+
+select option:checked {
+    background-color: #fdc073;
+    font-weight: bold;
+}
+
+
